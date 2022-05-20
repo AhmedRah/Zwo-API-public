@@ -1,0 +1,41 @@
+version: '3.9'
+services:
+  api:
+    container_name: api
+    restart: unless-stopped
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    env_file: api/.env
+    volumes:
+      - ./api/:/usr/src/api
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+
+  db:
+    container_name: db
+    image: postgres
+    restart: always
+    volumes:
+      - "db-data/:/var/lib/postgresql/data/"
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME_DEVELOPMENT}
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD", "postgresDB", "ping", "-h", "localhost" ]
+      timeout: 5s
+      retries: 10
+
+volumes:
+  db-data:
