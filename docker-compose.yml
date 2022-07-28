@@ -1,12 +1,13 @@
 version: '3.9'
 services:
   api:
-    container_name: api
-    restart: unless-stopped
+    # restart: unless-stopped
     build:
       context: ./api
       dockerfile: Dockerfile
     env_file: api/.env
+    environment:
+      - DB_HOST=db
     volumes:
       - ./api/:/usr/src/api
     ports:
@@ -16,20 +17,19 @@ services:
 
   adminer:
     image: adminer
-    restart: always
+    # restart: always
     ports:
       - 8080:8080
 
   db:
-    container_name: db
-    image: postgres
-    restart: always
+    image: postgres:13-alpine
+    # restart: always
     volumes:
-      - "db-data/:/var/lib/postgresql/data/"
+      - db_data:/var/lib/postgresql/data
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASS}
-      POSTGRES_DB: ${DB_NAME_DEVELOPMENT}
+      POSTGRES_USER: ${DB_USER:-db_zwo}
+      POSTGRES_PASSWORD: ${DB_PASS:-db_zwo}
+      POSTGRES_DB: ${DB_NAME_DEVELOPMENT:-db_zwo}
     ports:
       - "5432:5432"
     healthcheck:
@@ -38,4 +38,4 @@ services:
       retries: 10
 
 volumes:
-  db-data:
+  db_data: {}
