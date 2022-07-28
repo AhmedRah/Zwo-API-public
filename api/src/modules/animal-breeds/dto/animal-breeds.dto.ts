@@ -1,4 +1,4 @@
 export class UserDto {
-    readonly type: string;
-    readonly breed: string;
+  readonly type: string;
+  readonly breed: string;
 }

@@ -1,22 +1,13 @@
-import { Module } from "@nestjs/common";
-import { ConfigModule } from "@nestjs/config";
-import { DatabaseModule } from "./core/database/database.module";
-
+import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { DatabaseModule } from './core/database/database.module';
 import { UsersModule } from './modules/users/users.module';
-import { UsersService } from './modules/users/users.service';
-
-import { AnimalsModule } from "./modules/animals/animals.module";
-import { AnimalsService } from "./modules/animals/animals.service";
-
-
+import { AnimalsModule } from './modules/animals/animals.module';
 import { PostsModule } from './modules/posts/posts.module';
-import { PostsService } from './modules/posts/posts.service';
-
-import { AnimalBreedsService } from './modules/animal-breeds/animal-breeds.service';
 import { AnimalBreedsModule } from './modules/animal-breeds/animal-breeds.module';
 
-import { AppController } from "./app.controller";
-import { AppService } from "./app.service";
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
@@ -29,11 +20,7 @@ import { AuthModule } from './modules/auth/auth.module';
     AnimalBreedsModule,
     AuthModule,
   ],
-  providers: [
-    AppService
-  ],
-  controllers: [
-    AppController
-  ],
+  providers: [AppService],
+  controllers: [AppController],
 })
 export class AppModule {}
