@@ -11,7 +11,7 @@ export class AuthService {
     ) { }
 
     async validateUser(username: string, pass: string) {
-        const user = await this.userService.findOneByEmail(username);
+        const user = await this.userService.findOneByUserame(username);
         if (!user) {
             return null;
         }
@@ -26,7 +26,7 @@ export class AuthService {
         return result;
     }
 
-    public async login(user) {
+    public async login(user) {        
         const token = await this.generateToken(user);
         return { user, token };
     }

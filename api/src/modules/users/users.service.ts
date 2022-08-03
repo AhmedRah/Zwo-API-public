@@ -21,6 +21,10 @@ export class UsersService {
         return await this.userRepository.findOne<User>({ where: { email } });
     }
 
+    async findOneByUserame(username: string): Promise<User> {
+        return await this.userRepository.findOne<User>({ where: { username } });
+    }
+
     // find by gender
     // find by pet type/breed
 }
