@@ -15,7 +15,7 @@ help:	## DEFAULT_GOAL : Display help messages for child Makefile
 #    CONTAINERS   	#
 #-------------------#
 
-.PHONY:	info start stop reload build restart logs
+.PHONY:	info start stop reload build restart logs node
 
 start: 	## Start containers with default docker-compose.yml file
 	$(DOCKER_COMPOSE) up --remove-orphans -d
@@ -31,3 +31,6 @@ build:	## Build containers
 
 logs:	## Show logs for all or c=<name> containers
 	$(DOCKER_COMPOSE) logs --tail=100 -f $(c)
+
+node:   ## Execute node container
+	$(DOCKER_COMPOSE) exec -it api $(c)

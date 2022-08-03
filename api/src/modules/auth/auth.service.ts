@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import * as bcrypt from 'bcrypt'
-import { JwtService } from '@nestjs/jwt'
+import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class AuthService {
-    constructor(
+   constructor(
         private readonly userService: UsersService,
         private readonly jwtService: JwtService,
     ) { }
@@ -31,33 +31,33 @@ export class AuthService {
         return { user, token };
     }
 
-    public async signup(user) {
-        const pass = await this.hashPassword(user.password);
+  public async signup(user) {
+    const pass = await this.hashPassword(user.password);
 
-        const newUser = await this.userService.create({ ...user, password: pass });
+    const newUser = await this.userService.create({ ...user, password: pass });
 
-        // tslint:disable-next-line: no-string-literal
-        const { password, ...result } = newUser['dataValues'];
+    // tslint:disable-next-line: no-string-literal
+    const { password, ...result } = newUser['dataValues'];
 
-        // generate token
-        const token = await this.generateToken(result);
+    // generate token
+    const token = await this.generateToken(result);
 
-        // return the user and the token
-        return { user: result, token };
-    }
+    // return the user and the token
+    return { user: result, token };
+  }
 
-    private async comparePassword(inputPass: string, dbPass: string) {
-        const match = await bcrypt.compare(inputPass, dbPass);
-        return match;
-    }
+  private async comparePassword(inputPass: string, dbPass: string) {
+    const match = await bcrypt.compare(inputPass, dbPass);
+    return match;
+  }
 
-    private async hashPassword(password: string) {
-        const hash = await bcrypt.hash(password, 10);
-        return hash;
-    }
+  private async hashPassword(password: string) {
+    const hash = await bcrypt.hash(password, 10);
+    return hash;
+  }
 
-    private async generateToken(user) {
-        const token = await this.jwtService.signAsync(user);
-        return token;
-    }
+  private async generateToken(user) {
+    const token = await this.jwtService.signAsync(user);
+    return token;
+  }
 }
