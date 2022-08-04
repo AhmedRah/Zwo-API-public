@@ -5,31 +5,31 @@ import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class AuthService {
-   constructor(
-        private readonly userService: UsersService,
-        private readonly jwtService: JwtService,
-    ) { }
+  constructor(
+    private readonly userService: UsersService,
+    private readonly jwtService: JwtService,
+  ) {}
 
-    async validateUser(username: string, pass: string) {
-        const user = await this.userService.findOneByUserame(username);
-        if (!user) {
-            return null;
-        }
-
-        const correctPass = await this.comparePassword(pass, user.password);
-        if (!correctPass) {
-            return null;
-        }
-
-        // tslint:disable-next-line: no-string-literal
-        const { password, ...result } = user['dataValues'];
-        return result;
+  async validateUser(username: string, pass: string) {
+    const user = await this.userService.findOneByUserame(username);
+    if (!user) {
+      return null;
     }
 
-    public async login(user) {        
-        const token = await this.generateToken(user);
-        return { user, token };
+    const correctPass = await this.comparePassword(pass, user.password);
+    if (!correctPass) {
+      return null;
     }
+
+    // tslint:disable-next-line: no-string-literal
+    const { password, ...result } = user['dataValues'];
+    return result;
+  }
+
+  public async login(user) {
+    const token = await this.generateToken(user);
+    return { user, token };
+  }
 
   public async signup(user) {
     const pass = await this.hashPassword(user.password);
