@@ -33,7 +33,7 @@ logs:	## Show logs for all or c=<name> containers
 	$(DOCKER_COMPOSE) logs --tail=100 -f $(c)
 
 test:   ## Execute test
-	$(DOCKER_COMPOSE) exec -it api bash -c "npm run test"
+	$(DOCKER_COMPOSE) exec -T api bash -c "npm run test"
 
 lint-check: ## Lint and check code style
-	$(DOCKER_COMPOSE) exec -it api bash -c "npm run lint:check"
+	$(DOCKER_COMPOSE) exec -T api bash -c "npm run lint:check"
