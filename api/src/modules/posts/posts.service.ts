@@ -1,7 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { PostDto } from './dto/post.dto';
 import { Post } from './post.entity';
-import { User } from '../users/user.entity';
 
 @Injectable()
 export class PostsService {
@@ -12,16 +11,12 @@ export class PostsService {
   }
 
   async findAll(): Promise<Post[]> {
-    return await this.postRepository.findAll<Post>({});
+    return await this.postRepository.findAll<Post>();
   }
 
   async findOne(id): Promise<Post> {
     return await this.postRepository.findOne({
       where: { id },
-      attributes: {
-        exclude: ['author'],
-      },
-      include: [{ model: User, attributes: { exclude: ['password'] } }],
     });
   }
 
