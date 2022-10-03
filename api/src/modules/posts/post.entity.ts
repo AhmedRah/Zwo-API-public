@@ -1,6 +1,7 @@
 import { Table, Column, Model, DataType, ForeignKey, BelongsTo, BelongsToMany } from 'sequelize-typescript';
 import { User } from '../users/user.entity';
 import { Like } from './like/like.entity';
+import { Share } from './share/share.entity';
 
 @Table
 export class Post extends Model<Post> {
@@ -21,5 +22,8 @@ export class Post extends Model<Post> {
   user: User;
 
   @BelongsToMany(() => User, () => Like)
-  likes: Like[];
+  likes: User[];
+
+  @BelongsToMany(() => User, () => Share)
+  shares: User[];
 }
