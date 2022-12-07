@@ -15,6 +15,12 @@ export class Animal extends Model<Animal> {
     allowNull: false,
   })
   name: string;
+  
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  description: string;
 
   @Column({
     type: DataType.DATE,
