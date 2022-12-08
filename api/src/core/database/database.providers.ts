@@ -1,7 +1,7 @@
 import { Sequelize } from 'sequelize-typescript';
-import { SEQUELIZE, DEVELOPMENT, TEST, PRODUCTION } from '../constants';
-import { databaseConfig } from './database.config';
 import { User } from '../../modules/users/user.entity';
+import { DEVELOPMENT, PRODUCTION, SEQUELIZE, TEST } from '../constants';
+import { databaseConfig } from './database.config';
 import { Post } from '../../modules/posts/post.entity';
 import { Like } from '../../modules/posts/like/like.entity';
 import { Share } from '../../modules/posts/share/share.entity';
@@ -24,7 +24,6 @@ export const databaseProviders = [
         default:
           config = databaseConfig.development;
       }
-      console.log(config);
 
       const sequelize = new Sequelize(config);
       sequelize.addModels([User, Post, Like, Share]);
