@@ -1,49 +1,69 @@
 import { Injectable } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
+import {
+  buildAPIResponse,
+  buildErrorResponse,
+  ExposableError,
+} from 'src/utils/general';
 import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class AuthService {
-   constructor(
-        private readonly userService: UsersService,
-        private readonly jwtService: JwtService,
-    ) { }
+  constructor(
+    private readonly userService: UsersService,
+    private readonly jwtService: JwtService,
+  ) {}
 
-    async validateUser(username: string, pass: string) {
-        const user = await this.userService.findOneByUserame(username);
-        if (!user) {
-            return null;
-        }
-
-        const correctPass = await this.comparePassword(pass, user.password);
-        if (!correctPass) {
-            return null;
-        }
-
-        // tslint:disable-next-line: no-string-literal
-        const { password, ...result } = user['dataValues'];
-        return result;
+  async validateUser(username: string, pass: string) {
+    const user = await this.userService.findOneByUserame(username);
+    if (!user) {
+      return null;
     }
 
-    public async login(user) {        
-        const token = await this.generateToken(user);
-        return { user, token };
+    const correctPass = await this.comparePassword(pass, user.password);
+    if (!correctPass) {
+      return null;
     }
-
-  public async signup(user) {
-    const pass = await this.hashPassword(user.password);
-
-    const newUser = await this.userService.create({ ...user, password: pass });
 
     // tslint:disable-next-line: no-string-literal
-    const { password, ...result } = newUser['dataValues'];
+    const { password, ...result } = user['dataValues'];
+    return result;
+  }
 
-    // generate token
-    const token = await this.generateToken(result);
+  public async login(user) {
+    try {
+      const token = await this.generateToken(user);
+      return buildAPIResponse('Login success', { user, token });
+    } catch (error) {
+      console.log(error);
+      return buildErrorResponse('Login Failed', error.errors);
+    }
+  }
 
-    // return the user and the token
-    return { user: result, token };
+  public async signup(user) {
+    try {
+      const pass = await this.hashPassword(user.password);
+
+      console.log('here');
+      const newUser = await this.userService.create({
+        ...user,
+        password: pass,
+      });
+      console.log('her2');
+
+      // tslint:disable-next-line: no-string-literal
+      const { password, ...result } = newUser['dataValues'];
+
+      // generate token
+      const token = await this.generateToken(result);
+
+      // return the user and the token
+      return buildAPIResponse('Login success', { user: result, token });
+    } catch (error) {
+      console.log(error);
+      return buildErrorResponse('Signup Failed', error.errors);
+    }
   }
 
   private async comparePassword(inputPass: string, dbPass: string) {

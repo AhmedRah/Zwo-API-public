@@ -1,8 +1,8 @@
 // check to see if express request and response object might be a better fit for the zwo api needs
-import { Controller, Body, Post, UseGuards, Request } from '@nestjs/common';
+import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { AuthService } from './auth.service';
 import { UserDto } from '../users/dto/user.dto';
+import { AuthService } from './auth.service';
 
 @Controller('auth')
 export class AuthController {
@@ -15,7 +15,7 @@ export class AuthController {
   }
 
   @Post('signup')
-  async signUp(@Body() user: UserDto) {        
+  async signUp(@Body() user: UserDto) {
     return await this.authService.signup(user);
   }
 }
