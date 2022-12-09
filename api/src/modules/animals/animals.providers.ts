@@ -1,4 +1,7 @@
-import { ANIMAL_REPOSITORY, ANIMALBREED_REPOSITORY } from '../../core/constants';
+import {
+  ANIMAL_REPOSITORY,
+  ANIMALBREED_REPOSITORY,
+} from '../../core/constants';
 import { Animal } from './animal.entity';
 import { AnimalBreed } from '../animal-breeds/animal-breeds.entity';
 

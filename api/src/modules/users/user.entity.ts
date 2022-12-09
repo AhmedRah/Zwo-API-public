@@ -1,4 +1,10 @@
-import { Table, Column, Model, DataType, BelongsToMany } from 'sequelize-typescript';
+import {
+  Table,
+  Column,
+  Model,
+  DataType,
+  BelongsToMany,
+} from 'sequelize-typescript';
 import { USER_TABLE } from '../../core/constants';
 import { Post } from '../posts/post.entity';
 import { Like } from '../posts/like/like.entity';

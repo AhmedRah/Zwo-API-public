@@ -1,4 +1,9 @@
-import { ApiBadRequestResponse, ApiBearerAuth, ApiNotFoundResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiNotFoundResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import {
   Controller,
   Body,

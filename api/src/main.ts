@@ -5,7 +5,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  const version =  process.env.API_VERSION || 'v1';
+  const version = process.env.API_VERSION || 'v1';
   app.setGlobalPrefix(`api/${version}`);
 
   const config = new DocumentBuilder()

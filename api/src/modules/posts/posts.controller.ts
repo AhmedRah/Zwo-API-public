@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, NotFoundException, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Param,
+  Body,
+  NotFoundException,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { PostsService } from './posts.service';
 import { PostDto } from './dto/post.dto';
@@ -37,9 +48,17 @@ export class PostsController {
 
   @UseGuards(AuthGuard('jwt'))
   @Put(':id')
-  async update(@Param('id') id: number, @Body() post: PostDto, @Request() req): Promise<PostEntity> {
+  async update(
+    @Param('id') id: number,
+    @Body() post: PostDto,
+    @Request() req,
+  ): Promise<PostEntity> {
     // get the number of row affected and the updated post
-    const { numberOfAffectedRows, updatedPost } = await this.postService.update(id, post, req.user.id);
+    const { numberOfAffectedRows, updatedPost } = await this.postService.update(
+      id,
+      post,
+      req.user.id,
+    );
 
     // if the number of row affected is zero,
     // it means the post doesn't exist in our db

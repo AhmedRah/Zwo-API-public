@@ -4,7 +4,9 @@ import { LikesDto } from './dto/like.dto';
 
 @Injectable()
 export class LikesService {
-  constructor(@Inject('LIKE_REPOSITORY') private readonly likeRepository: typeof Like) {}
+  constructor(
+    @Inject('LIKE_REPOSITORY') private readonly likeRepository: typeof Like,
+  ) {}
 
   // get all likes
   async findAll(): Promise<Like[]> {

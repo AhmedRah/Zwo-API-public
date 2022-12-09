@@ -1,6 +1,11 @@
 import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { AnimalBreedsService } from './animal-breeds.service';
-import { ApiBearerAuth, ApiNotFoundResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiNotFoundResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('animals-breeds')
