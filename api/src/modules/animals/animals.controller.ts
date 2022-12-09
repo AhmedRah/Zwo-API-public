@@ -14,6 +14,7 @@ import {
   Post,
   UseGuards,
   Request,
+  HttpCode,
 } from '@nestjs/common';
 import { AnimalsService } from './animals.service';
 import { Animal } from './animal.entity';
@@ -44,17 +45,18 @@ export class AnimalsController {
     return this.animalsService.create(animalDto, req.user);
   }
 
-  /*@Patch(':id')
+  @HttpCode(204)
+  @Patch(':id')
   update(
     @Param('id') id: string,
     @Body() animalDto: AnimalDto,
     @Request() req,
-  ): Promise<Animal> {
+  ): Promise<void> {
     return this.animalsService.update(id, animalDto, req.user);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string, @Request() req): Promise<void> {
     return this.animalsService.remove(id, req.user);
-  }*/
+  }
 }

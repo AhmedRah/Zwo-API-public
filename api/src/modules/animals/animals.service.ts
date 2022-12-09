@@ -25,15 +25,24 @@ export class AnimalsService {
   findAll(user: User): Promise<Animal[]> {
     return this.animalRepository.findAll<Animal>({
       where: { owner: user.id },
-      attributes: {
-        exclude: ['breedId'],
-      },
+      include: [
+        {
+          model: AnimalBreed,
+          as: 'breed',
+        },
+      ],
     });
   }
 
   async findOne(id: string, user: User): Promise<Animal> {
     const animal = await this.animalRepository.findOne<Animal>({
       where: { id, owner: user.id },
+      include: [
+        {
+          model: AnimalBreed,
+          as: 'breed',
+        },
+      ],
     });
     if (!animal) {
       throw new NotFoundException(`Animal #${id} not found`);
@@ -52,27 +61,44 @@ export class AnimalsService {
 
     try {
       const animal = await this.animalRepository.create<Animal>({
-        name: animalDto.name,
-        description: animalDto.description,
-        birthday: animalDto.birthday,
-        //avatar: animalDto.avatar,
+        ...animalDto,
         owner: user.id,
-        breedId: animalDto.breedId,
       });
 
       return this.animalRepository.findOne({
         where: { id: animal.id },
-        attributes: {
-          exclude: ['breedId'],
-          include: ['breed'],
-        },
+        include: [
+          {
+            model: AnimalBreed,
+            as: 'breed',
+          },
+        ],
       });
     } catch (e) {
-      throw new BadRequestException(e.message);
+      throw new BadRequestException('Animal values are not valid');
     }
   }
 
-  /*update(id: string, animalDto: AnimalDto, user: User): Promise<Animal> {}
+  async update(id: string, animalDto: AnimalDto, user: User): Promise<void> {
+    const animal = await this.animalRepository.findOne({
+      where: { id, owner: user.id },
+    });
 
-  remove(id: string, user: User): Promise<void> {}*/
+    if (!animal) {
+      throw new NotFoundException(`Animal #${id} not found`);
+    }
+
+    await this.animalRepository.update(
+      {
+        ...animalDto,
+      },
+      { where: { id } },
+    );
+  }
+
+  async remove(id: string, user: User): Promise<void> {
+    await this.animalRepository.destroy({
+      where: { id, owner: user.id },
+    });
+  }
 }
