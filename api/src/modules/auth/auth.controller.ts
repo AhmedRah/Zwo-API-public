@@ -1,9 +1,9 @@
 // check to see if express request and response object might be a better fit for the zwo api needs
-import { Controller, Body, Post, UseGuards, Request } from '@nestjs/common';
+import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { AuthService } from './auth.service';
 import { UserDto } from '../users/dto/user.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { AuthService } from './auth.service';
 
 @ApiTags('auth')
 @Controller('auth')
