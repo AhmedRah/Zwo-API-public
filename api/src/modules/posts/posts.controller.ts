@@ -14,7 +14,9 @@ import { AuthGuard } from '@nestjs/passport';
 import { PostsService } from './posts.service';
 import { PostDto } from './dto/post.dto';
 import { Post as PostEntity } from './post.entity';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('posts')
 @Controller('posts')
 export class PostsController {
   constructor(private readonly postService: PostsService) {}
