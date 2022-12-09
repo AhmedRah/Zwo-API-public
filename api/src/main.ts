@@ -5,16 +5,14 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  const prefix = `api/v${process.env.API_VERSION || 1}`;
-  app.setGlobalPrefix(prefix);
+  const version =  process.env.API_VERSION || 'v1';
+  app.setGlobalPrefix(`api/${version}`);
 
   const config = new DocumentBuilder()
     .setTitle('Swaggy swagger')
     .setDescription('The ZWO API swagger')
-    .setVersion(`v${process.env.API_VERSION || 1}`)
-    .setBasePath(prefix)
-    .addTag('auth')
-    .addTag('animals-breeds')
+    .setVersion(version)
+    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('swagger', app, document);

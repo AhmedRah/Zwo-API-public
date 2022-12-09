@@ -4,27 +4,38 @@ import {
   Model,
   DataType,
   ForeignKey,
+  BelongsTo,
 } from 'sequelize-typescript';
 import { User } from '../users/user.entity';
 import { AnimalBreed } from '../animal-breeds/animal-breeds.entity';
+import { ANIMAL_TABLE, ANIMALBREED_TABLE } from '../../core/constants';
 
-@Table
+@Table({ tableName: ANIMAL_TABLE })
 export class Animal extends Model<Animal> {
   @Column({
     type: DataType.STRING,
     allowNull: false,
+    validate: {
+      len: [3, 50],
+    },
   })
   name: string;
-  
+
   @Column({
     type: DataType.STRING,
     allowNull: true,
+    validate: {
+      len: [0, 250],
+    },
   })
   description: string;
 
   @Column({
     type: DataType.DATE,
     allowNull: false,
+    validate: {
+      isDate: true,
+    },
   })
   birthday: string;
 
@@ -46,17 +57,8 @@ export class Animal extends Model<Animal> {
     type: DataType.INTEGER,
     allowNull: false,
   })
-  breed: number;
+  breedId: number;
 
-  @Column({
-    type: DataType.DATE,
-    allowNull: false,
-  })
-  created_at: string;
-
-  @Column({
-    type: DataType.DATE,
-    allowNull: true,
-  })
-  updated_at: string;
+  @BelongsTo(() => AnimalBreed)
+  breed: AnimalBreed;
 }

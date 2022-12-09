@@ -1,6 +1,7 @@
 import { Table, Column, Model, DataType } from 'sequelize-typescript';
+import { USER_TABLE } from '../../core/constants';
 
-@Table
+@Table({ tableName: USER_TABLE })
 export class User extends Model<User> {
   @Column({
     type: DataType.STRING,

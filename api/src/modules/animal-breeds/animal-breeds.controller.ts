@@ -1,8 +1,11 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { AnimalBreedsService } from './animal-breeds.service';
-import { ApiNotFoundResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiNotFoundResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('animals-breeds')
+@ApiBearerAuth()
+@UseGuards(AuthGuard('jwt'))
 @Controller('animals/breeds')
 export class AnimalBreedsController {
   constructor(private animalBreedsService: AnimalBreedsService) {}
