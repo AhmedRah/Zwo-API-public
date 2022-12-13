@@ -4,7 +4,9 @@ import { Post } from './post.entity';
 
 @Injectable()
 export class PostsService {
-  constructor(@Inject('POST_REPOSITORY') private readonly postRepository: typeof Post) {}
+  constructor(
+    @Inject('POST_REPOSITORY') private readonly postRepository: typeof Post,
+  ) {}
 
   async create(post: PostDto, author): Promise<Post> {
     return await this.postRepository.create<Post>({ ...post, author });
@@ -25,7 +27,11 @@ export class PostsService {
   }
 
   async update(id, data, author) {
-    const [numberOfAffectedRows, [updatedPost]] = await this.postRepository.update({ ...data }, { where: { id, author }, returning: true });
+    const [numberOfAffectedRows, [updatedPost]] =
+      await this.postRepository.update(
+        { ...data },
+        { where: { id, author }, returning: true },
+      );
 
     return { numberOfAffectedRows, updatedPost };
   }

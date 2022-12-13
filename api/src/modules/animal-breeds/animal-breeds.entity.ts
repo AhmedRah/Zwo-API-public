@@ -1,6 +1,7 @@
 import { Table, Column, Model, DataType } from 'sequelize-typescript';
+import { ANIMALBREED_TABLE } from '../../core/constants';
 
-@Table
+@Table({ tableName: ANIMALBREED_TABLE })
 export class AnimalBreed extends Model<AnimalBreed> {
   @Column({
     type: DataType.STRING,

@@ -7,6 +7,11 @@ import { usersProviders } from '../../users/users.providers';
 
 @Module({
   controllers: [LikesController],
-  providers: [LikesService, ...likesProviders, ...postsProviders, ...usersProviders],
+  providers: [
+    LikesService,
+    ...likesProviders,
+    ...postsProviders,
+    ...usersProviders,
+  ],
 })
 export class LikesModule {}

@@ -7,6 +7,11 @@ import { usersProviders } from '../../users/users.providers';
 
 @Module({
   controllers: [SharesController],
-  providers: [SharesService, ...sharesProviders, ...postsProviders, ...usersProviders],
+  providers: [
+    SharesService,
+    ...sharesProviders,
+    ...postsProviders,
+    ...usersProviders,
+  ],
 })
 export class SharesModule {}

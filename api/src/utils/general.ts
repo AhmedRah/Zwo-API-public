@@ -25,7 +25,7 @@ class ExposableError extends Error {
   }
 
   toString() {
-    let message =
+    const message =
       typeof this.message === 'string'
         ? this.message
         : JSON.stringify(this.message);

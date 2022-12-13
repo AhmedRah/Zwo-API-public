@@ -23,7 +23,7 @@ jobs:
         run: make start
 
       - name: Run lint checks
-        run: make node c="npm run lint:check"
+        run: docker-compose exec -it api bash -c "npm run test"
 
       - name: Run Tests
-        run: make node c="npm run test"
+        run: docker-compose exec -it api bash -c "npm run lint:check"

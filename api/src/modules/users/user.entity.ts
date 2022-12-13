@@ -1,9 +1,16 @@
-import { Table, Column, Model, DataType, BelongsToMany } from 'sequelize-typescript';
+import {
+  Table,
+  Column,
+  Model,
+  DataType,
+  BelongsToMany,
+} from 'sequelize-typescript';
+import { USER_TABLE } from '../../core/constants';
 import { Post } from '../posts/post.entity';
 import { Like } from '../posts/like/like.entity';
 import { Share } from '../posts/share/share.entity';
 
-@Table
+@Table({ tableName: USER_TABLE })
 export class User extends Model<User> {
   @Column({
     type: DataType.STRING,

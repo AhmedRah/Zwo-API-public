@@ -4,7 +4,9 @@ import { SharesDto } from './dto/share.dto';
 
 @Injectable()
 export class SharesService {
-  constructor(@Inject('SHARE_REPOSITORY') private readonly shareRepository: typeof Share) {}
+  constructor(
+    @Inject('SHARE_REPOSITORY') private readonly shareRepository: typeof Share,
+  ) {}
 
   // get all shares
   async findAll(): Promise<Share[]> {

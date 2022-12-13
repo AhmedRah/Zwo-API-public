@@ -1,8 +1,20 @@
-import { Controller, Get, Post, Delete, Param, Body, NotFoundException, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Param,
+  Body,
+  NotFoundException,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Share as ShareEntity } from './share.entity';
 import { SharesService } from './shares.service';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('posts-shares')
 @Controller('shares')
 export class SharesController {
   constructor(private readonly sharesService: SharesService) {}
