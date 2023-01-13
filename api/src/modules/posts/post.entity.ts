@@ -16,6 +16,9 @@ export class Post extends Model<Post> {
   @Column({
     type: DataType.STRING,
     allowNull: false,
+    validate: {
+      len: [0, 1000],
+    },
   })
   content: string;
 
