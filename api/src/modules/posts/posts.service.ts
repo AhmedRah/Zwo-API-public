@@ -12,8 +12,13 @@ export class PostsService {
     return await this.postRepository.create<Post>({ ...post, author });
   }
 
-  async findAll(): Promise<Post[]> {
-    return await this.postRepository.findAll<Post>();
+  async findAll(page = 1, limit = 10): Promise<any> {
+    const offset = (page - 1) * limit;
+    const { count, rows } = await this.postRepository.findAndCountAll({
+      offset,
+      limit,
+    });
+    return { rows, count };
   }
 
   async findOne(id): Promise<Post> {

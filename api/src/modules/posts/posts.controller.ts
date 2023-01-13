@@ -6,6 +6,7 @@ import {
   Delete,
   Param,
   Body,
+  Query,
   NotFoundException,
   UseGuards,
   Request,
@@ -22,9 +23,9 @@ export class PostsController {
   constructor(private readonly postService: PostsService) {}
 
   @Get()
-  async findAll() {
+  async findAll(@Query('page') page: number, @Query('limit') limit: number) {
     // get all posts in the db
-    return await this.postService.findAll();
+    return await this.postService.findAll(page, limit);
   }
 
   @Get(':id')
