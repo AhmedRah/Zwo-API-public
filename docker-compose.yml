@@ -14,11 +14,6 @@ services:
     depends_on:
       - db
 
-  adminer:
-    image: adminer
-    ports:
-      - 8080:8080
-
   db:
     image: postgres:13-alpine
     volumes:

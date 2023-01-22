@@ -5,10 +5,10 @@ import { UsersModule } from './modules/users/users.module';
 import { AnimalsModule } from './modules/animals/animals.module';
 import { PostsModule } from './modules/posts/posts.module';
 import { AnimalBreedsModule } from './modules/animal-breeds/animal-breeds.module';
-
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
+import { ImagesModule } from './modules/images/images.module';
 
 @Module({
   imports: [
@@ -19,6 +19,7 @@ import { AuthModule } from './modules/auth/auth.module';
     PostsModule,
     AnimalBreedsModule,
     AuthModule,
+    ImagesModule,
   ],
   providers: [AppService],
   controllers: [AppController],
