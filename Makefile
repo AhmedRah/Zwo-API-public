@@ -29,6 +29,9 @@ restart:	## Restart containers
 build:	## Build containers
 	$(DOCKER_COMPOSE) build
 
+ps: ## Display containers status
+	$(DOCKER_COMPOSE) ps
+
 logs:	## Show logs for all or c=<name> containers
 	$(DOCKER_COMPOSE) logs --tail=100 -f $(c)
 
