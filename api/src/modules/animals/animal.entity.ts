@@ -5,10 +5,11 @@ import {
   DataType,
   ForeignKey,
   BelongsTo,
+  AfterFind,
 } from 'sequelize-typescript';
 import { User } from '../users/user.entity';
 import { AnimalBreed } from '../animal-breeds/animal-breeds.entity';
-import { ANIMAL_TABLE, ANIMALBREED_TABLE } from '../../core/constants';
+import { ANIMAL_TABLE } from '../../core/constants';
 
 @Table({ tableName: ANIMAL_TABLE })
 export class Animal extends Model<Animal> {
