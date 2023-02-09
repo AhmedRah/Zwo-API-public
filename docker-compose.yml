@@ -1,7 +1,6 @@
 version: '3.9'
 services:
   api:
-    # restart: unless-stopped
     build:
       context: ./api
       dockerfile: Dockerfile
@@ -17,13 +16,11 @@ services:
 
   adminer:
     image: adminer
-    # restart: always
     ports:
       - 8080:8080
 
   db:
     image: postgres:13-alpine
-    # restart: always
     volumes:
       - db_data:/var/lib/postgresql/data
     environment:

@@ -12,6 +12,7 @@ import {
 } from '../../core/constants';
 import { AnimalDto } from './dto/animal.dto';
 import { AnimalBreed } from '../animal-breeds/animal-breeds.entity';
+import { UploadUtil } from '../../utils/upload';
 
 @Injectable()
 export class AnimalsService {
@@ -20,6 +21,7 @@ export class AnimalsService {
     private readonly animalRepository: typeof Animal,
     @Inject(ANIMALBREED_REPOSITORY)
     private readonly animalBreedRepository: typeof AnimalBreed,
+    private readonly uploadUtil: UploadUtil,
   ) {}
 
   findAll(user: User): Promise<Animal[]> {
@@ -50,7 +52,11 @@ export class AnimalsService {
     return animal;
   }
 
-  async create(animalDto: AnimalDto, user: User): Promise<Animal> {
+  async create(
+    animalDto: AnimalDto,
+    user: User,
+    animalFile?: Express.Multer.File,
+  ): Promise<Animal> {
     const breed = await this.animalBreedRepository.findOne<AnimalBreed>({
       where: { id: animalDto.breedId },
     });
@@ -59,11 +65,22 @@ export class AnimalsService {
       throw new BadRequestException(`Breed #${animalDto.breedId} not found`);
     }
 
+    const newAnimal: any = {
+      ...animalDto,
+      owner: user.id,
+    };
+
+    // Save animal file
+    if (animalFile) {
+      newAnimal.avatar = await this.uploadUtil.saveImage(
+        animalFile,
+        500,
+        process.env.UPLOAD_PATH_ANIMALS,
+      );
+    }
+
     try {
-      const animal = await this.animalRepository.create<Animal>({
-        ...animalDto,
-        owner: user.id,
-      });
+      const animal = await this.animalRepository.create<Animal>(newAnimal);
 
       return this.animalRepository.findOne({
         where: { id: animal.id },
@@ -79,7 +96,12 @@ export class AnimalsService {
     }
   }
 
-  async update(id: string, animalDto: AnimalDto, user: User): Promise<void> {
+  async update(
+    id: string,
+    animalDto: AnimalDto,
+    user: User,
+    animalFile?: Express.Multer.File,
+  ): Promise<void> {
     const animal = await this.animalRepository.findOne({
       where: { id, owner: user.id },
     });
@@ -88,12 +110,29 @@ export class AnimalsService {
       throw new NotFoundException(`Animal #${id} not found`);
     }
 
-    await this.animalRepository.update(
-      {
-        ...animalDto,
-      },
-      { where: { id } },
-    );
+    const updatedAnimal: any = {
+      ...animalDto,
+    };
+
+    // Delete old image
+    // TODO: Trouver une solution pour supprimer l'ancienne image si on envoi null
+    if (animalFile && animal.avatar) {
+      this.uploadUtil.deleteFile(
+        animal.avatar,
+        process.env.UPLOAD_PATH_ANIMALS,
+      );
+    }
+
+    // Save animal file
+    if (animalFile) {
+      updatedAnimal.avatar = await this.uploadUtil.saveImage(
+        animalFile,
+        500,
+        process.env.UPLOAD_PATH_ANIMALS,
+      );
+    }
+
+    await this.animalRepository.update(updatedAnimal, { where: { id } });
   }
 
   async remove(id: string, user: User): Promise<void> {

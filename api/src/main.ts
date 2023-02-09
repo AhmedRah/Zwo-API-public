@@ -8,15 +8,22 @@ async function bootstrap() {
   const version = process.env.API_VERSION || 'v1';
   app.setGlobalPrefix(`api/${version}`);
 
-  const config = new DocumentBuilder()
-    .setTitle('Swaggy swagger')
-    .setDescription('The ZWO API swagger')
-    .setVersion(version)
-    .addBearerAuth()
-    .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('swagger', app, document);
+  app.enableCors({
+    origin: process.env.CORS_ALLOW_ORIGIN,
+    credentials: true,
+  });
 
-  await app.listen(3000);
+  if (process.env.NODE_ENV !== 'production') {
+    const config = new DocumentBuilder()
+      .setTitle('Swaggy swagger')
+      .setDescription('The ZWO API swagger')
+      .setVersion(version)
+      .addBearerAuth()
+      .build();
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('swagger', app, document);
+  }
+
+  await app.listen(process.env.PORT || 3000);
 }
 bootstrap();
