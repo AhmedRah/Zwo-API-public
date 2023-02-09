@@ -1,20 +1,22 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { AnimalsController } from './animals.controller';
 import { AnimalsService } from './animals.service';
 import { animalsProviders } from './animals.providers';
 import { UploadUtil } from '../../utils/upload';
 
-describe('AnimalsService', () => {
-  let service: AnimalsService;
+describe('Animalsontroller', () => {
+  let controller: AnimalsController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      controllers: [AnimalsController],
       providers: [AnimalsService, UploadUtil, ...animalsProviders],
     }).compile();
 
-    service = module.get<AnimalsService>(AnimalsService);
+    controller = module.get<AnimalsController>(AnimalsController);
   });
 
   it('should be defined', () => {
-    expect(service).toBeDefined();
+    expect(controller).toBeDefined();
   });
 });
