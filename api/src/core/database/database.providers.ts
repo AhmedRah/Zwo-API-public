@@ -29,7 +29,9 @@ export const databaseProviders = [
 
       const sequelize = new Sequelize(config);
       sequelize.addModels([User, Animal, AnimalBreed, Post, Like, Share]);
-      await sequelize.sync();
+      await sequelize.sync({
+        alter: process.env.SEQUELIZE_SYNC_ALTER === 'true',
+      });
       return sequelize;
     },
   },

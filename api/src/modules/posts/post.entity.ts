@@ -29,6 +29,12 @@ export class Post extends Model<Post> {
   })
   author: number;
 
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  postImage: string;
+
   @BelongsTo(() => User)
   user: User;
 

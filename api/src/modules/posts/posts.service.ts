@@ -9,7 +9,10 @@ export class PostsService {
   ) {}
 
   async create(post: PostDto, author): Promise<Post> {
-    return await this.postRepository.create<Post>({ ...post, author });
+    return await this.postRepository.create<Post>({
+      ...post,
+      author,
+    });
   }
 
   async findAll(page = 1, limit = 10): Promise<any> {

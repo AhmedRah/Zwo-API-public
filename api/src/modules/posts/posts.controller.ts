@@ -10,17 +10,25 @@ import {
   NotFoundException,
   UseGuards,
   Request,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { PostsService } from './posts.service';
 import { PostDto } from './dto/post.dto';
 import { Post as PostEntity } from './post.entity';
 import { ApiTags } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { FileSizeValidationPipe } from '../../pipes/file-size-validation.pipe';
+import { UploadUtil } from '../../utils/upload';
 
 @ApiTags('posts')
 @Controller('posts')
 export class PostsController {
-  constructor(private readonly postService: PostsService) {}
+  constructor(
+    private readonly postService: PostsService,
+    private readonly uploadUtil: UploadUtil,
+  ) {}
 
   @Get()
   async findAll(@Query('page') page: number, @Query('limit') limit: number) {
@@ -44,9 +52,25 @@ export class PostsController {
 
   @UseGuards(AuthGuard('jwt'))
   @Post()
-  async create(@Body() post: PostDto, @Request() req): Promise<PostEntity> {
+  @UseInterceptors(FileInterceptor('postImages'))
+  async create(
+    @Request() req,
+    @Body() bodyFormFields,
+    @UploadedFile(new FileSizeValidationPipe())
+    postImages?: Express.Multer.File,
+  ): Promise<PostEntity> {
     // create a new post and return the newly created post
-    return await this.postService.create(post, req.user.id);
+    const postData = {
+      content: bodyFormFields.content,
+      postImage: postImages
+        ? await this.uploadUtil.saveImage(
+            postImages,
+            500,
+            process.env.UPLOAD_PATH_ANIMALS,
+          )
+        : null,
+    };
+    return await this.postService.create(postData, req.user.id);
   }
 
   @UseGuards(AuthGuard('jwt'))
