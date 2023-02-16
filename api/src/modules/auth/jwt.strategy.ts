@@ -9,24 +9,31 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private readonly userService: UsersService) {
     // extending Passport config
     super({
-      // jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false, // for session management
       secretOrKey: process.env.JWTKEY,
       jwtFromRequest: ExtractJwt.fromExtractors([
-        (request: Request) => {
-          let data = request?.cookies['auth-cookie'];
-          if (!data) {
-            return null;
-          }
-          return data.token;
-        },
+        JwtStrategy.extractJWT,
+        ExtractJwt.fromAuthHeaderAsBearerToken(),
       ]),
     });
+  }
+
+  private static extractJWT(req: Request): string | null {
+    if (
+      req.cookies &&
+      'auth-cookie' in req.cookies &&
+      req.cookies['auth-cookie'].length > 0
+    ) {
+      return req.cookies['auth-cookie'];
+    }
+    return null;
   }
 
   async validate(payload: any) {
     // verify that the user in token data exist
     const user = await this.userService.findOneById(payload.id);
+    console.log(user);
+
     if (!user) {
       throw new UnauthorizedException('Access denied');
     }

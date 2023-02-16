@@ -19,11 +19,12 @@ import { AuthService } from './auth.service';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  @UseGuards(AuthGuard('local'))
+  @UseGuards(AuthGuard('jwt'))
   @Get('test')
   findAll(@Req() request: Request) {
-    console.log(request.cookies); // or "request.cookies['cookieKey']"
-    // or console.log(request.signedCookies);
+    console.log('Test Endpoint');
+    console.log(request.cookies);
+    return { message: 'Valid Token' };
   }
 
   @UseGuards(AuthGuard('local'))
