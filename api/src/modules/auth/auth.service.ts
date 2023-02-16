@@ -30,9 +30,9 @@ export class AuthService {
   public async login(user) {
     try {
       const token = await this.generateToken(user);
-      return buildAPIResponse('Login success', { user, token });
+      return { data: buildAPIResponse('Login success'), token };
     } catch (error) {
-      return buildErrorResponse('Login Failed', error.errors);
+      return { error: buildErrorResponse('Login Failed', error.errors) };
     }
   }
 
@@ -51,10 +51,9 @@ export class AuthService {
       // generate token
       const token = await this.generateToken(result);
 
-      // return the user and the token
-      return buildAPIResponse('Login success', { user: result, token });
+      return { data: buildAPIResponse('Signup success'), token };
     } catch (error) {
-      return buildErrorResponse('Signup Failed', error.errors);
+      return { error: buildErrorResponse('Login Failed', error.errors) };
     }
   }
 
