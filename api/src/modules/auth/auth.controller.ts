@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Get,
   HttpCode,
   Post,
   Req,
@@ -18,12 +17,6 @@ import { AuthService } from './auth.service';
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
-
-  @UseGuards(AuthGuard('jwt'))
-  @Get('me')
-  me(@Req() req) {
-    return req.user;
-  }
 
   @ApiBody({
     schema: {

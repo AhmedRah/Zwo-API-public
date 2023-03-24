@@ -1,6 +1,5 @@
 import {
   ApiBadRequestResponse,
-  ApiBearerAuth,
   ApiNotFoundResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -26,7 +25,6 @@ import { FileSizeValidationPipe } from '../../pipes/file-size-validation.pipe';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('animals')
-@ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'))
 @Controller('animals')
 export class AnimalsController {
