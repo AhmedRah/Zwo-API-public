@@ -15,25 +15,39 @@ export class User extends Model<User> {
   @Column({
     type: DataType.STRING,
     unique: true,
+    validate: {
+      min: 3,
+      max: 20,
+      regex: /^[a-zA-Z0-9_]*$/,
+    },
     allowNull: false,
   })
   username: string;
 
   @Column({
     type: DataType.STRING,
+    validate: {
+      min: 3,
+      max: 25,
+    },
     allowNull: false,
   })
-  firstname: string;
+  displayName: string;
 
   @Column({
     type: DataType.STRING,
-    allowNull: false,
+    validate: {
+      max: 255,
+    },
   })
-  lastname: string;
+  bio: string;
 
   @Column({
     type: DataType.STRING,
     unique: true,
+    validate: {
+      isEmail: true,
+    },
     allowNull: false,
   })
   email: string;
@@ -47,23 +61,27 @@ export class User extends Model<User> {
   @Column({
     type: DataType.ENUM,
     values: ['male', 'female', 'other'],
+    allowNull: false,
   })
   gender: string;
 
   @Column({
     type: DataType.DATE,
+    allowNull: false,
   })
   birthday: Date;
 
   @Column({
     type: DataType.ENUM,
     values: ['FR'],
+    allowNull: false,
   })
   language: string;
 
   @Column({
     type: DataType.ENUM,
     values: ['FRA'],
+    allowNull: false,
   })
   country: string;
 

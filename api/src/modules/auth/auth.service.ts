@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
+import { PASSWORD_REGEX } from '../../core/constants';
 import { ValidationException } from '../../utils/error';
 
 @Injectable()
@@ -30,6 +31,10 @@ export class AuthService {
   }
 
   public async signup(user) {
+    if (!PASSWORD_REGEX.test(user.password)) {
+      throw new BadRequestException('Password invalid');
+    }
+
     const newUser = await this.userService
       .create({
         ...user,
