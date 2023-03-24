@@ -1,17 +1,17 @@
 import {
+  Body,
   Controller,
+  Delete,
   Get,
+  NotFoundException,
+  Param,
   Post,
   Put,
-  Delete,
-  Param,
-  Body,
   Query,
-  NotFoundException,
-  UseGuards,
   Request,
-  UseInterceptors,
   UploadedFile,
+  UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { PostsService } from './posts.service';
@@ -21,6 +21,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FileSizeValidationPipe } from '../../pipes/file-size-validation.pipe';
 import { UploadUtil } from '../../utils/upload';
+import * as fs from 'fs';
 
 @ApiTags('posts')
 @Controller('posts')
@@ -37,7 +38,7 @@ export class PostsController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: number): Promise<PostEntity> {
+  async findOne(@Param('id') id: number): Promise<any> {
     // find the post with this id
     const post = await this.postService.findOne(id);
 
@@ -45,14 +46,19 @@ export class PostsController {
     if (!post) {
       throw new NotFoundException("This Post doesn't exist");
     }
-
+    // return post;
+    const path = `${process.env.UPLOAD_PATH_ANIMALS}/${post.postImage}`;
+    const imageStream = fs.readFileSync(path);
+    const data = imageStream.toString('base64');
     // if post exist, return the post
-    return post;
+    // post.postImage = imageStream;
+
+    return data;
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Post()
-  @UseInterceptors(FileInterceptor('postImages'))
+  @UseInterceptors(FileInterceptor('postImage'))
   async create(
     @Request() req,
     @Body() bodyFormFields,
