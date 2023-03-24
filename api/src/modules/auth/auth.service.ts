@@ -37,8 +37,14 @@ export class AuthService {
 
     const newUser = await this.userService
       .create({
-        ...user,
+        username: user.username,
+        displayName: user.displayName,
+        email: user.email,
         password: await this.hashPassword(user.password),
+        gender: user.gender,
+        birthday: user.birthday,
+        language: user.language,
+        country: user.country,
       })
       .catch((e) => ValidationException(e));
 
