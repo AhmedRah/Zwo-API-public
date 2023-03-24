@@ -5,7 +5,6 @@ import {
   DataType,
   ForeignKey,
   BelongsTo,
-  AfterFind,
 } from 'sequelize-typescript';
 import { User } from '../users/user.entity';
 import { AnimalBreed } from '../animal-breeds/animal-breeds.entity';

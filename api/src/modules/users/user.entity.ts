@@ -46,31 +46,24 @@ export class User extends Model<User> {
 
   @Column({
     type: DataType.ENUM,
-    // add whatever flavour of gender you want , could be remvoved entirely if it get's too  comp
     values: ['male', 'female', 'other'],
-    allowNull: true,
   })
   gender: string;
 
   @Column({
     type: DataType.DATE,
-    allowNull: true,
   })
   birthday: Date;
 
   @Column({
     type: DataType.ENUM,
-    // add more supported languages as the app gets more main stream
-    values: ['EN', 'FR', 'AR'],
-    allowNull: true,
+    values: ['FR'],
   })
   language: string;
 
   @Column({
     type: DataType.ENUM,
-    // add more supported languages as the app gets more main stream
-    values: ['USA', 'FRA'],
-    allowNull: true,
+    values: ['FRA'],
   })
   country: string;
 

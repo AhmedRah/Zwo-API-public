@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { buildAPIResponse, buildErrorResponse } from 'src/utils/general';
 import { UsersService } from '../users/users.service';
+import { ValidationException } from '../../utils/error';
 
 @Injectable()
 export class AuthService {
@@ -12,7 +12,7 @@ export class AuthService {
   ) {}
 
   async validateUser(username: string, pass: string) {
-    const user = await this.userService.findOneByUserame(username);
+    const user = await this.userService.findOneByUsername(username);
     if (!user) {
       return null;
     }
@@ -22,39 +22,22 @@ export class AuthService {
       return null;
     }
 
-    // tslint:disable-next-line: no-string-literal
-    const { password, ...result } = user['dataValues'];
-    return result;
+    return user['dataValues'];
   }
 
   public async login(user) {
-    try {
-      const token = await this.generateToken(user);
-      return { data: buildAPIResponse('Login success'), token };
-    } catch (error) {
-      return { error: buildErrorResponse('Login Failed', error.errors) };
-    }
+    return await this.generateToken(user);
   }
 
   public async signup(user) {
-    try {
-      const pass = await this.hashPassword(user.password);
-
-      const newUser = await this.userService.create({
+    const newUser = await this.userService
+      .create({
         ...user,
-        password: pass,
-      });
+        password: await this.hashPassword(user.password),
+      })
+      .catch((e) => ValidationException(e));
 
-      // tslint:disable-next-line: no-string-literal
-      const { password, ...result } = newUser['dataValues'];
-
-      // generate token
-      const token = await this.generateToken(result);
-
-      return { data: buildAPIResponse('Signup success'), token };
-    } catch (error) {
-      return { error: buildErrorResponse('Login Failed', error.errors) };
-    }
+    return await this.generateToken(newUser['dataValues']);
   }
 
   private async comparePassword(inputPass: string, dbPass: string) {
@@ -62,10 +45,13 @@ export class AuthService {
   }
 
   private async hashPassword(password: string) {
-    return await bcrypt.hash(password, 10);
+    return await bcrypt.hash(password, 12);
   }
 
   private async generateToken(user) {
-    return await this.jwtService.signAsync(user);
+    return await this.jwtService.signAsync({
+      id: user.id,
+      username: user.username,
+    });
   }
 }
