@@ -1,11 +1,12 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
-  NotFoundException,
   Param,
   Patch,
+  Post,
   Query,
   Req,
   UseGuards,
@@ -22,9 +23,23 @@ import { ValidationException } from '../../utils/error';
 export class UsersController {
   constructor(private usersService: UsersService) {}
 
+  @Get()
+  findAll(
+    @Query('q') query: string,
+    @Query('page') page: number,
+    @Query('limit') limit: number,
+  ) {
+    return this.usersService.findAll(query, page, limit);
+  }
+
   @Get('me')
   me(@Req() req) {
     return req.user;
+  }
+
+  @Get(':id')
+  async findProfile(@Req() req, @Param('id') id: string) {
+    return this.usersService.findProfile(+id);
   }
 
   @HttpCode(204)
@@ -38,27 +53,25 @@ export class UsersController {
       .catch((e) => ValidationException(e));
   }
 
-  @Get(':id')
-  async findOne(@Req() req, @Param('id') id: string) {
-    const user = await this.usersService.findOneById(+id);
-    if (!user) {
-      throw new NotFoundException();
-    }
-
-    return {
-      id: user.id,
-      username: user.username,
-      displayName: user.displayName,
-      bio: user.bio,
-    };
+  @HttpCode(201)
+  @Post('me/follow/:id')
+  async follow(@Req() req, @Param('id') id: string) {
+    return this.usersService.follow(req.user.id, +id);
   }
 
-  @Get()
-  findAll(
-    @Query('q') query: string,
-    @Query('page') page: number,
-    @Query('limit') limit: number,
-  ) {
-    return this.usersService.findAll(query, page, limit);
+  @HttpCode(204)
+  @Delete('me/unfollow/:id')
+  async unfollow(@Req() req, @Param('id') id: string) {
+    return this.usersService.unfollow(req.user.id, +id);
+  }
+
+  @Get(':id/followers')
+  async findFollowers(@Param('id') id: string) {
+    return this.usersService.findFollowers(+id);
+  }
+
+  @Get(':id/following')
+  async findFollowing(@Param('id') id: string) {
+    return this.usersService.findFollowing(+id);
   }
 }

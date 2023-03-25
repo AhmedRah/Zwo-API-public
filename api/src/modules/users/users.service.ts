@@ -1,7 +1,16 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { User } from './user.entity';
+import { Follower } from './followers/follower.entity';
 import { UserDto } from './dto/user.dto';
-import { USER_REPOSITORY } from '../../core/constants';
+import {
+  USER_FOLLOWER_REPOSITORY,
+  USER_REPOSITORY,
+} from '../../core/constants';
 import { UserUpdateDto } from './dto/user-update.dto';
 import * as process from 'process';
 import { Op } from 'sequelize';
@@ -10,6 +19,8 @@ import { Op } from 'sequelize';
 export class UsersService {
   constructor(
     @Inject(USER_REPOSITORY) private readonly userRepository: typeof User,
+    @Inject(USER_FOLLOWER_REPOSITORY)
+    private readonly userFollowerRepository: typeof Follower,
   ) {}
 
   async create(user: UserDto): Promise<User> {
@@ -28,11 +39,7 @@ export class UsersService {
     return await this.userRepository.findOne<User>({ where: { username } });
   }
 
-  async findAll(
-    query: string,
-    page = 1,
-    limit = 20,
-  ): Promise<{ rows: User[]; count: number }> {
+  async findAll(query: string, page = 1, limit = 20) {
     if (page < 1 || limit < 1 || limit > +process.env.MAX_PAGE_SIZE) {
       throw new BadRequestException();
     }
@@ -40,7 +47,6 @@ export class UsersService {
     const offset = (page - 1) * limit;
 
     const { count, rows } = await this.userRepository.findAndCountAll({
-      attributes: ['id', 'username', 'displayName'],
       where: {
         [Op.or]: [
           {
@@ -59,6 +65,67 @@ export class UsersService {
       limit,
     });
 
-    return { rows, count };
+    return {
+      rows: rows.map((u) => u.detailName),
+      count,
+    };
+  }
+
+  async findProfile(id: number) {
+    const user = await this.userRepository.findOne({
+      where: { id },
+      include: ['followers', 'following'],
+    });
+    if (!user) {
+      throw new NotFoundException();
+    }
+
+    return user.profile;
+  }
+
+  async follow(userId: number, followingId: number) {
+    if (userId === followingId) {
+      throw new BadRequestException();
+    }
+
+    try {
+      await this.userFollowerRepository.findOrCreate({
+        where: { followerId: userId, followingId: followingId },
+      });
+    } catch (e) {
+      throw new BadRequestException();
+    }
+  }
+
+  async unfollow(userId: number, followingId: number) {
+    try {
+      await this.userFollowerRepository.destroy({
+        where: { followerId: userId, followingId: followingId },
+      });
+    } catch (e) {
+      throw new BadRequestException();
+    }
+  }
+
+  async findFollowers(id: number) {
+    const followers = await this.userRepository.findAll({
+      where: {
+        '$followers.followingId$': id,
+      },
+      include: 'followers',
+    });
+
+    return followers.map((f) => f.detailName);
+  }
+
+  async findFollowing(id: number) {
+    const following = await this.userRepository.findAll({
+      where: {
+        '$following.followerId$': id,
+      },
+      include: 'following',
+    });
+
+    return following.map((f) => f.detailName);
   }
 }
