@@ -40,7 +40,7 @@ export class UsersController {
 
   @Get(':id')
   async findProfile(@Req() req, @Param('id') id: string) {
-    return this.usersService.findProfile(+id);
+    return this.usersService.findProfile(req.user.id, +id);
   }
 
   @HttpCode(204)

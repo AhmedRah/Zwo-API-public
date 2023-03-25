@@ -116,11 +116,11 @@ export class User extends Model<User> {
   donationURL: string;
 
   @ApiHideProperty()
-  @HasMany(() => Follower, 'followerId')
+  @HasMany(() => Follower, 'followingId')
   followers: User[];
 
   @ApiHideProperty()
-  @HasMany(() => Follower, 'followingId')
+  @HasMany(() => Follower, 'followerId')
   following: User[];
 
   @ApiHideProperty()
@@ -153,8 +153,9 @@ export class User extends Model<User> {
       bio: this.bio,
       websiteURL: this.websiteURL,
       donationURL: this.donationURL,
-      followers: this.followers.length,
-      following: this.following.length,
+      following: false, // Is set in the service
+      followersCount: this.followers.length,
+      followingCount: this.following.length,
       animals: this.animals?.map((animal) => animal.minProfile),
       createdAt: this.createdAt,
     };

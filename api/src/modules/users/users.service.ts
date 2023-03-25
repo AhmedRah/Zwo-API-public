@@ -70,7 +70,7 @@ export class UsersService {
     };
   }
 
-  async findProfile(id: number) {
+  async findProfile(currentUserId: number, id: number) {
     const user = await this.userRepository.findOne({
       where: { id },
       include: ['followers', 'following', 'animals'],
@@ -79,7 +79,12 @@ export class UsersService {
       throw new NotFoundException();
     }
 
-    return user.profile;
+    return {
+      ...user.profile,
+      following: user.followers.some(
+        (u: any) => u.followerId === currentUserId,
+      ),
+    };
   }
 
   async follow(userId: number, followingId: number) {
@@ -109,9 +114,9 @@ export class UsersService {
   async findFollowers(id: number) {
     const followers = await this.userRepository.findAll({
       where: {
-        '$followers.followingId$': id,
+        '$following.followingId$': id,
       },
-      include: 'followers',
+      include: 'following',
     });
 
     return followers.map((f) => f.detailName);
@@ -120,9 +125,9 @@ export class UsersService {
   async findFollowing(id: number) {
     const following = await this.userRepository.findAll({
       where: {
-        '$following.followerId$': id,
+        '$followers.followerId$': id,
       },
-      include: 'following',
+      include: 'followers',
     });
 
     return following.map((f) => f.detailName);
