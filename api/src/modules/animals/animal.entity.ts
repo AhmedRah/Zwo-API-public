@@ -23,7 +23,6 @@ export class Animal extends Model<Animal> {
 
   @Column({
     type: DataType.STRING,
-    allowNull: true,
     validate: {
       len: [0, 250],
     },
@@ -32,7 +31,6 @@ export class Animal extends Model<Animal> {
 
   @Column({
     type: DataType.DATE,
-    allowNull: false,
     validate: {
       isDate: true,
     },
@@ -40,8 +38,16 @@ export class Animal extends Model<Animal> {
   birthday: string;
 
   @Column({
+    type: DataType.INTEGER,
+    validate: {
+      min: 0,
+      max: 999,
+    },
+  })
+  weight: number;
+
+  @Column({
     type: DataType.STRING,
-    allowNull: true,
   })
   avatar: string;
 
@@ -55,10 +61,32 @@ export class Animal extends Model<Animal> {
   @ForeignKey(() => AnimalBreed)
   @Column({
     type: DataType.INTEGER,
-    allowNull: false,
   })
   breedId: number;
 
   @BelongsTo(() => AnimalBreed)
   breed: AnimalBreed;
+
+  get minProfile() {
+    return {
+      id: this.id,
+      name: this.name,
+      birthday: this.birthday,
+      avatar: this.avatar,
+    };
+  }
+
+  get profile() {
+    return {
+      id: this.id,
+      name: this.name,
+      description: this.description,
+      birthday: this.birthday,
+      weight: this.weight,
+      avatar: this.avatar,
+      breed: this.breed?.breedDetail,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+    };
+  }
 }

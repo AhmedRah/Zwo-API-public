@@ -11,14 +11,14 @@ export class AnimalBreedsController {
 
   @ApiOperation({ summary: 'Get all animals types' })
   @Get('types')
-  findTypes(): Promise<{ type: string; nbBreeds: number }[]> {
+  findTypes() {
     return this.animalBreedsService.findTypes();
   }
 
   @ApiOperation({ summary: 'Get all breeds by type' })
   @ApiNotFoundResponse({ description: 'Not found' })
   @Get(':type')
-  findBreeds(@Param('type') type: string): Promise<string[]> {
+  findBreeds(@Param('type') type: string) {
     return this.animalBreedsService.findBreeds(type);
   }
 }

@@ -24,21 +24,9 @@ export class AnimalsService {
     private readonly uploadUtil: UploadUtil,
   ) {}
 
-  findAll(user: User): Promise<Animal[]> {
-    return this.animalRepository.findAll<Animal>({
-      where: { owner: user.id },
-      include: [
-        {
-          model: AnimalBreed,
-          as: 'breed',
-        },
-      ],
-    });
-  }
-
-  async findOne(id: string, user: User): Promise<Animal> {
+  async findOne(id: string) {
     const animal = await this.animalRepository.findOne<Animal>({
-      where: { id, owner: user.id },
+      where: { id },
       include: [
         {
           model: AnimalBreed,
@@ -49,50 +37,37 @@ export class AnimalsService {
     if (!animal) {
       throw new NotFoundException(`Animal #${id} not found`);
     }
-    return animal;
+    return animal.profile;
   }
 
   async create(
     animalDto: AnimalDto,
     user: User,
     animalFile?: Express.Multer.File,
-  ): Promise<Animal> {
-    const breed = await this.animalBreedRepository.findOne<AnimalBreed>({
-      where: { id: animalDto.breedId },
-    });
-
-    if (!breed) {
-      throw new BadRequestException(`Breed #${animalDto.breedId} not found`);
-    }
-
+  ): Promise<void> {
     const newAnimal: any = {
       ...animalDto,
       owner: user.id,
     };
 
+    try {
+      await this.animalRepository.create<Animal>(newAnimal);
+    } catch (e) {
+      throw new BadRequestException('Animal values are not valid');
+    }
+
     // Save animal file
     if (animalFile) {
-      newAnimal.avatar = await this.uploadUtil.saveImage(
+      const avatar = await this.uploadUtil.saveImage(
         animalFile,
         500,
         process.env.UPLOAD_PATH_ANIMALS,
       );
-    }
 
-    try {
-      const animal = await this.animalRepository.create<Animal>(newAnimal);
-
-      return this.animalRepository.findOne({
-        where: { id: animal.id },
-        include: [
-          {
-            model: AnimalBreed,
-            as: 'breed',
-          },
-        ],
-      });
-    } catch (e) {
-      throw new BadRequestException('Animal values are not valid');
+      await this.animalRepository.update(
+        { avatar },
+        { where: { id: newAnimal.id } },
+      );
     }
   }
 
@@ -111,8 +86,18 @@ export class AnimalsService {
     }
 
     const updatedAnimal: any = {
-      ...animalDto,
+      name: animalDto.name,
+      description: animalDto.description,
+      birthday: animalDto.birthday,
+      weight: animalDto.weight,
+      breedId: animalDto.breedId,
     };
+
+    try {
+      await this.animalRepository.update(updatedAnimal, { where: { id } });
+    } catch (e) {
+      throw new BadRequestException('Animal values are not valid');
+    }
 
     // Delete old image
     // TODO: Trouver une solution pour supprimer l'ancienne image si on envoi null
@@ -125,14 +110,14 @@ export class AnimalsService {
 
     // Save animal file
     if (animalFile) {
-      updatedAnimal.avatar = await this.uploadUtil.saveImage(
+      const avatar = await this.uploadUtil.saveImage(
         animalFile,
         500,
         process.env.UPLOAD_PATH_ANIMALS,
       );
-    }
 
-    await this.animalRepository.update(updatedAnimal, { where: { id } });
+      await this.animalRepository.update({ avatar }, { where: { id } });
+    }
   }
 
   async remove(id: string, user: User): Promise<void> {

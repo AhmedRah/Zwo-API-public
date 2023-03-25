@@ -12,6 +12,7 @@ import { Like } from '../posts/like/like.entity';
 import { Share } from '../posts/share/share.entity';
 import { ApiHideProperty } from '@nestjs/swagger';
 import { Follower } from './followers/follower.entity';
+import { Animal } from '../animals/animal.entity';
 
 @Table({ tableName: USER_TABLE })
 export class User extends Model<User> {
@@ -19,8 +20,7 @@ export class User extends Model<User> {
     type: DataType.STRING,
     unique: true,
     validate: {
-      min: 3,
-      max: 20,
+      len: [3, 20],
       regex: /^[a-zA-Z0-9_]*$/,
     },
     allowNull: false,
@@ -30,8 +30,7 @@ export class User extends Model<User> {
   @Column({
     type: DataType.STRING,
     validate: {
-      min: 3,
-      max: 25,
+      len: [3, 25],
     },
     allowNull: false,
   })
@@ -40,7 +39,7 @@ export class User extends Model<User> {
   @Column({
     type: DataType.STRING,
     validate: {
-      max: 255,
+      len: [0, 255],
     },
   })
   bio: string;
@@ -49,6 +48,7 @@ export class User extends Model<User> {
     type: DataType.STRING,
     unique: true,
     validate: {
+      len: [0, 255],
       isEmail: true,
     },
     allowNull: false,
@@ -98,6 +98,10 @@ export class User extends Model<User> {
   following: User[];
 
   @ApiHideProperty()
+  @HasMany(() => Animal, 'owner')
+  animals: Animal[];
+
+  @ApiHideProperty()
   @BelongsToMany(() => Post, () => Like)
   likes: Post[];
 
@@ -121,6 +125,7 @@ export class User extends Model<User> {
       bio: this.bio,
       followers: this.followers.length,
       following: this.following.length,
+      animals: this.animals?.map((animal) => animal.minProfile),
       createdAt: this.createdAt,
     };
   }

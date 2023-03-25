@@ -74,7 +74,7 @@ export class UsersService {
   async findProfile(id: number) {
     const user = await this.userRepository.findOne({
       where: { id },
-      include: ['followers', 'following'],
+      include: ['followers', 'following', 'animals'],
     });
     if (!user) {
       throw new NotFoundException();
