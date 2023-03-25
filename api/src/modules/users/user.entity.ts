@@ -13,6 +13,7 @@ import { Share } from '../posts/share/share.entity';
 import { ApiHideProperty } from '@nestjs/swagger';
 import { Follower } from './followers/follower.entity';
 import { Animal } from '../animals/animal.entity';
+import { UserTypes } from './enums/user-types.enum';
 
 @Table({ tableName: USER_TABLE })
 export class User extends Model<User> {
@@ -35,6 +36,13 @@ export class User extends Model<User> {
     allowNull: false,
   })
   displayName: string;
+
+  @Column({
+    type: DataType.ENUM,
+    values: Object.keys(UserTypes),
+    defaultValue: UserTypes.USER,
+  })
+  type: string;
 
   @Column({
     type: DataType.STRING,
@@ -89,6 +97,24 @@ export class User extends Model<User> {
   })
   country: string;
 
+  @Column({
+    type: DataType.STRING,
+    validate: {
+      len: [0, 255],
+      isUrl: true,
+    },
+  })
+  websiteURL: string;
+
+  @Column({
+    type: DataType.STRING,
+    validate: {
+      len: [0, 255],
+      isUrl: true,
+    },
+  })
+  donationURL: string;
+
   @ApiHideProperty()
   @HasMany(() => Follower, 'followerId')
   followers: User[];
@@ -114,6 +140,7 @@ export class User extends Model<User> {
       id: this.id,
       username: this.username,
       displayName: this.displayName,
+      type: this.type,
     };
   }
 
@@ -122,7 +149,10 @@ export class User extends Model<User> {
       id: this.id,
       username: this.username,
       displayName: this.displayName,
+      type: this.type,
       bio: this.bio,
+      websiteURL: this.websiteURL,
+      donationURL: this.donationURL,
       followers: this.followers.length,
       following: this.following.length,
       animals: this.animals?.map((animal) => animal.minProfile),

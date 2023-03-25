@@ -16,6 +16,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { UserUpdateDto } from './dto/user-update.dto';
 import { ValidationException } from '../../utils/error';
+import { UserTypes } from './enums/user-types.enum';
 
 @ApiTags('users')
 @UseGuards(AuthGuard('jwt'))
@@ -45,10 +46,25 @@ export class UsersController {
   @HttpCode(204)
   @Patch('me')
   updateMe(@Req() req, @Body() userUpdateDto: UserUpdateDto) {
+    const newData: any = {
+      displayName: userUpdateDto.displayName,
+      bio: userUpdateDto.bio,
+    };
+
+    if ([UserTypes.COMPANY, UserTypes.ASSOCIATION].includes(req.user.type)) {
+      newData.websiteURL = userUpdateDto.websiteURL;
+    }
+
+    if (req.user.type === UserTypes.ASSOCIATION) {
+      newData.donationURL = userUpdateDto.donationURL;
+    }
+
     return this.usersService
       .update(req.user.id, {
         displayName: userUpdateDto.displayName,
         bio: userUpdateDto.bio,
+        websiteURL: userUpdateDto.websiteURL,
+        donationURL: userUpdateDto.donationURL,
       })
       .catch((e) => ValidationException(e));
   }

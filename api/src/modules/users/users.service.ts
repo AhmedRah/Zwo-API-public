@@ -11,7 +11,6 @@ import {
   USER_FOLLOWER_REPOSITORY,
   USER_REPOSITORY,
 } from '../../core/constants';
-import { UserUpdateDto } from './dto/user-update.dto';
 import * as process from 'process';
 import { Op } from 'sequelize';
 
@@ -27,7 +26,7 @@ export class UsersService {
     return await this.userRepository.create<User>(user);
   }
 
-  async update(id: number, user: UserUpdateDto): Promise<void> {
+  async update(id: number, user: any): Promise<void> {
     await this.userRepository.update(user, { where: { id } });
   }
 
