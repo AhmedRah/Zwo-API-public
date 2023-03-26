@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -17,6 +18,10 @@ import { UsersService } from './users.service';
 import { UserUpdateDto } from './dto/user-update.dto';
 import { ValidationException } from '../../utils/error';
 import { UserTypes } from './enums/user-types.enum';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const avatars = require('../../../data/avatars.json');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const colors = require('../../../data/colors.json');
 
 @ApiTags('users')
 @UseGuards(AuthGuard('jwt'))
@@ -33,11 +38,6 @@ export class UsersController {
     return this.usersService.findAll(query, page, limit);
   }
 
-  @Get('me')
-  me(@Req() req) {
-    return req.user;
-  }
-
   @Get(':id')
   async findProfile(@Req() req, @Param('id') id: string) {
     return this.usersService.findProfile(req.user.id, +id);
@@ -51,6 +51,28 @@ export class UsersController {
       bio: userUpdateDto.bio,
     };
 
+    if (userUpdateDto.avatarId) {
+      // Search in file if avatar exists
+      const avatar = avatars.data.find(
+        (avatar: any) => avatar.id == userUpdateDto.avatarId,
+      );
+      if (!avatar) {
+        throw new BadRequestException('Avatar not found');
+      }
+      newData.avatar = avatar.avatar;
+    }
+
+    if (userUpdateDto.avatarColorId) {
+      // Search in file if color exists
+      const color = colors.data.find(
+        (color: any) => color.id == userUpdateDto.avatarColorId,
+      );
+      if (!color) {
+        throw new BadRequestException('Color not found');
+      }
+      newData.avatarColor = color.color;
+    }
+
     if ([UserTypes.COMPANY, UserTypes.ASSOCIATION].includes(req.user.type)) {
       newData.websiteURL = userUpdateDto.websiteURL;
     }
@@ -60,12 +82,7 @@ export class UsersController {
     }
 
     return this.usersService
-      .update(req.user.id, {
-        displayName: userUpdateDto.displayName,
-        bio: userUpdateDto.bio,
-        websiteURL: userUpdateDto.websiteURL,
-        donationURL: userUpdateDto.donationURL,
-      })
+      .update(req.user.id, newData)
       .catch((e) => ValidationException(e));
   }
 

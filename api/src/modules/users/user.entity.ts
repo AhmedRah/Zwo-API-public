@@ -14,6 +14,7 @@ import { ApiHideProperty } from '@nestjs/swagger';
 import { Follower } from './followers/follower.entity';
 import { Animal } from '../animals/animal.entity';
 import { UserTypes } from './enums/user-types.enum';
+import { GetBase64Image } from '../../utils/media';
 
 @Table({ tableName: USER_TABLE })
 export class User extends Model<User> {
@@ -69,6 +70,21 @@ export class User extends Model<User> {
     allowNull: false,
   })
   password: string;
+
+  @Column({
+    type: DataType.STRING,
+  })
+  avatar: string;
+
+  @Column({
+    type: DataType.STRING,
+  })
+  avatarColor: string;
+
+  @Column({
+    type: DataType.STRING,
+  })
+  avatarCustom: string;
 
   @Column({
     type: DataType.ENUM,
@@ -141,6 +157,7 @@ export class User extends Model<User> {
       username: this.username,
       displayName: this.displayName,
       type: this.type,
+      avatar: this.avatarObject,
     };
   }
 
@@ -150,6 +167,7 @@ export class User extends Model<User> {
       username: this.username,
       displayName: this.displayName,
       type: this.type,
+      avatar: this.avatarObject,
       bio: this.bio,
       websiteURL: this.websiteURL,
       donationURL: this.donationURL,
@@ -158,6 +176,27 @@ export class User extends Model<User> {
       followingCount: this.following.length,
       animals: this.animals?.map((animal) => animal.minProfile),
       createdAt: this.createdAt,
+    };
+  }
+
+  private get avatarObject() {
+    let dir;
+    let avatar = this.avatar || 'default.png';
+    const color = this.avatarColor || 'ff914d'; // orange
+
+    if (
+      this.avatarCustom &&
+      [UserTypes.CERTIFIED, UserTypes.ASSOCIATION, UserTypes.COMPANY].includes(
+        this.type,
+      )
+    ) {
+      dir = process.env.UPLOAD_PATH_AVATAR;
+      avatar = this.avatarCustom;
+    }
+
+    return {
+      image: GetBase64Image(avatar, dir || process.env.PATH_AVATAR),
+      color: color,
     };
   }
 }
