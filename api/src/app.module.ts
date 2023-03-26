@@ -8,7 +8,6 @@ import { AnimalBreedsModule } from './modules/animal-breeds/animal-breeds.module
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
-import { ImagesModule } from './modules/images/images.module';
 
 @Module({
   imports: [
@@ -19,7 +18,6 @@ import { ImagesModule } from './modules/images/images.module';
     PostsModule,
     AnimalBreedsModule,
     AuthModule,
-    ImagesModule,
   ],
   providers: [AppService],
   controllers: [AppController],

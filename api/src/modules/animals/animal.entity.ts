@@ -9,6 +9,8 @@ import {
 import { User } from '../users/user.entity';
 import { AnimalBreed } from '../animal-breeds/animal-breeds.entity';
 import { ANIMAL_TABLE } from '../../core/constants';
+import { GetBase64Image } from '../../utils/media';
+import * as process from 'process';
 
 @Table({ tableName: ANIMAL_TABLE })
 export class Animal extends Model<Animal> {
@@ -72,7 +74,7 @@ export class Animal extends Model<Animal> {
       id: this.id,
       name: this.name,
       birthday: this.birthday,
-      avatar: this.avatar,
+      avatar: this.avatar64,
     };
   }
 
@@ -83,10 +85,16 @@ export class Animal extends Model<Animal> {
       description: this.description,
       birthday: this.birthday,
       weight: this.weight,
-      avatar: this.avatar,
+      avatar: this.avatar64,
       breed: this.breed?.breedDetail,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
     };
+  }
+
+  private get avatar64() {
+    return !this.avatar
+      ? null
+      : GetBase64Image(this.avatar, process.env.UPLOAD_PATH_ANIMALS);
   }
 }
