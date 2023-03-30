@@ -4,15 +4,15 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { User } from './user.entity';
-import { Follower } from './followers/follower.entity';
-import { UserDto } from './dto/user.dto';
+import * as process from 'process';
+import { Op } from 'sequelize';
 import {
   USER_FOLLOWER_REPOSITORY,
   USER_REPOSITORY,
 } from '../../core/constants';
-import * as process from 'process';
-import { Op } from 'sequelize';
+import { UserDto } from './dto/user.dto';
+import { Follower } from './followers/follower.entity';
+import { User } from './user.entity';
 
 @Injectable()
 export class UsersService {

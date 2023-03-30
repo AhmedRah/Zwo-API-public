@@ -1,9 +1,9 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { UsersService } from '../users/users.service';
 import { PASSWORD_REGEX } from '../../core/constants';
 import { ValidationException } from '../../utils/error';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class AuthService {
@@ -46,7 +46,10 @@ export class AuthService {
         language: user.language,
         country: user.country,
       })
-      .catch((e) => ValidationException(e));
+      .catch((e) => {
+        console.log('Create user failed:', e);
+        ValidationException(e);
+      });
 
     return await this.generateToken(newUser['dataValues']);
   }
