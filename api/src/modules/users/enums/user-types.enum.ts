@@ -1,0 +1,7 @@
+export const UserTypes = {
+  USER: 'USER',
+  BOT: 'BOT',
+  CERTIFIED: 'CERTIFIED',
+  ASSOCIATION: 'ASSOCIATION',
+  COMPANY: 'COMPANY',
+};

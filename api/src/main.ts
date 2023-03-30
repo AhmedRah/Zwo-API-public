@@ -1,9 +1,11 @@
 import { NestFactory } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.use(cookieParser());
 
   const version = process.env.API_VERSION || 'v1';
   app.setGlobalPrefix(`api/${version}`);
@@ -18,7 +20,6 @@ async function bootstrap() {
       .setTitle('Swaggy swagger')
       .setDescription('The ZWO API swagger')
       .setVersion(version)
-      .addBearerAuth()
       .build();
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('swagger', app, document);

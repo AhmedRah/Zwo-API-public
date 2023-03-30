@@ -2,6 +2,7 @@ import { Sequelize } from 'sequelize-typescript';
 import { DEVELOPMENT, PRODUCTION, SEQUELIZE, TEST } from '../constants';
 import { databaseConfig } from './database.config';
 import { User } from '../../modules/users/user.entity';
+import { Follower } from '../../modules/users/followers/follower.entity';
 import { Animal } from '../../modules/animals/animal.entity';
 import { AnimalBreed } from '../../modules/animal-breeds/animal-breeds.entity';
 import { Post } from '../../modules/posts/post.entity';
@@ -28,10 +29,16 @@ export const databaseProviders = [
       }
 
       const sequelize = new Sequelize(config);
-      sequelize.addModels([User, Animal, AnimalBreed, Post, Like, Share]);
-      await sequelize.sync({
-        force: process.env.SEQUELIZE_SYNC_ALTER === 'true',
-      });
+      sequelize.addModels([
+        User,
+        Follower,
+        Animal,
+        AnimalBreed,
+        Post,
+        Like,
+        Share,
+      ]);
+      await sequelize.sync();
       return sequelize;
     },
   },

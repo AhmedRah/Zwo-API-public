@@ -1,8 +1,16 @@
-// check to see if express request and response object might be a better fit for the zwo api needs
-import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { ApiBody, ApiTags } from '@nestjs/swagger';
+import { Response } from 'express';
 import { UserDto } from '../users/dto/user.dto';
-import { ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 
 @ApiTags('auth')
@@ -10,14 +18,34 @@ import { AuthService } from './auth.service';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        username: {
+          type: 'string',
+        },
+        password: {
+          type: 'string',
+        },
+      },
+    },
+  })
+  @HttpCode(204)
   @UseGuards(AuthGuard('local'))
   @Post('login')
-  async login(@Request() req) {
-    return await this.authService.login(req.user);
+  async login(@Req() req, @Res({ passthrough: true }) res: Response) {
+    const token = await this.authService.login(req.user);
+    res.cookie('auth-cookie', token, { httpOnly: true });
   }
 
+  @HttpCode(201)
   @Post('signup')
-  async signUp(@Body() user: UserDto) {
-    return await this.authService.signup(user);
+  async signUp(
+    @Body() user: UserDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const token = await this.authService.signup(user);
+    res.cookie('auth-cookie', token, { httpOnly: true });
   }
 }
