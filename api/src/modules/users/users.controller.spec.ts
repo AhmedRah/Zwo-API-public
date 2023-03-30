@@ -27,7 +27,7 @@ describe('UsersController', () => {
 
   describe('findAll', () => {
     it('should return an array of users', async () => {
-      const result = usersTest.findAll.input;
+      const result = usersTest.findAll;
       jest
         .spyOn(service, 'findAll')
         .mockImplementation(() => Promise.resolve(result));
@@ -38,7 +38,7 @@ describe('UsersController', () => {
 
   describe('findProfile', () => {
     it('should return a user profile', async () => {
-      const user = usersTest.findProfile.input;
+      const user = usersTest.findProfile;
       jest
         .spyOn(service, 'findProfile')
         .mockImplementation(() => Promise.resolve(user));
@@ -49,31 +49,28 @@ describe('UsersController', () => {
 
   describe('updateMe', () => {
     it('should update the current user', async () => {
-      const userUpdateDto: UserUpdateDto = {
-        displayName: 'Jane Doe',
-        bio: 'Hello, world!',
-      };
+      const userUpdateDto: UserUpdateDto = usersTest.updateMe.success;
       jest.spyOn(service, 'update').mockImplementation(() => Promise.resolve());
 
       expect(
         await controller.updateMe(
-          { user: { id: 1, type: UserTypes.USER } },
+          { user: { id: usersTest.updateMe.userId, type: UserTypes.USER } },
           userUpdateDto,
         ),
       ).toBeUndefined();
     });
 
-    // it('should throw a BadRequestException if avatar is not found', async () => {
-    //   const userUpdateDto: UserUpdateDto = { avatarId: 1000 };
-    //   jest.spyOn(service, 'update').mockImplementation(() => Promise.reject());
+    it('should throw a BadRequestException if avatar is not found', async () => {
+      const userUpdateDto: UserUpdateDto = usersTest.updateMe.failed_avatar_id;
+      jest.spyOn(service, 'update').mockImplementation(() => Promise.reject());
 
-    //   await expect(
-    //     controller.updateMe(
-    //       { user: { id: 1, type: UserTypes.USER } },
-    //       userUpdateDto,
-    //     ),
-    //   ).rejects.toThrow(BadRequestException);
-    // });
+      await expect(
+        controller.updateMe(
+          { user: { id: 1, type: UserTypes.USER } },
+          userUpdateDto,
+        ),
+      ).rejects.toThrow(BadRequestException);
+    });
 
     // it('should throw a BadRequestException if color is not found', async () => {
     //   const userUpdateDto: UserUpdateDto = { avatarColorId: 1000 };
