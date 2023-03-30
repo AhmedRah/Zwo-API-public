@@ -5,6 +5,7 @@ import {
   Delete,
   Get,
   HttpCode,
+  InternalServerErrorException,
   Param,
   Patch,
   Post,
@@ -14,10 +15,10 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags } from '@nestjs/swagger';
-import { UsersService } from './users.service';
-import { UserUpdateDto } from './dto/user-update.dto';
 import { ValidationException } from '../../utils/error';
+import { UserUpdateDto } from './dto/user-update.dto';
 import { UserTypes } from './enums/user-types.enum';
+import { UsersService } from './users.service';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const avatars = require('../../../data/avatars.json');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -45,7 +46,7 @@ export class UsersController {
 
   @HttpCode(204)
   @Patch('me')
-  updateMe(@Req() req, @Body() userUpdateDto: UserUpdateDto) {
+  async updateMe(@Req() req, @Body() userUpdateDto: UserUpdateDto) {
     const newData: any = {
       displayName: userUpdateDto.displayName,
       bio: userUpdateDto.bio,
@@ -81,9 +82,13 @@ export class UsersController {
       newData.donationURL = userUpdateDto.donationURL;
     }
 
-    return this.usersService
-      .update(req.user.id, newData)
-      .catch((e) => ValidationException(e));
+    try {
+      await this.usersService
+        .update(req.user.id, newData)
+        .catch((e) => ValidationException(e));
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to update user!');
+    }
   }
 
   @HttpCode(201)
