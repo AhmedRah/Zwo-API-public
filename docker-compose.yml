@@ -1,6 +1,7 @@
 version: '3.9'
 services:
   api:
+    # restart: unless-stopped
     build:
       context: ./api
       dockerfile: Dockerfile
@@ -10,25 +11,28 @@ services:
     volumes:
       - ./api/:/usr/src/api
     ports:
-      - "3000:3000"
+      - "172.17.0.1:3000:3000"
     depends_on:
       - db
 
   adminer:
     image: adminer
+    # restart: always
     ports:
-      - 8080:8080
+      - "172.17.0.1:8080:8080"
 
   db:
     image: postgres:13-alpine
+    # restart: always
     volumes:
       - db_data:/var/lib/postgresql/data
+    env_file: api/.env
     environment:
-      POSTGRES_USER: ${DB_USER:-db_zwo}
-      POSTGRES_PASSWORD: ${DB_PASS:-db_zwo}
-      POSTGRES_DB: ${DB_NAME_DEVELOPMENT:-db_zwo}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME_DEVELOPMENT}
     ports:
-      - "5432:5432"
+      - "172.17.0.1:5432:5432"
     healthcheck:
       test: [ "CMD", "postgresDB", "ping", "-h", "localhost" ]
       timeout: 5s

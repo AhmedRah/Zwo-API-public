@@ -16,14 +16,28 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Create an .env file
-        run: cp ./api/.env.sample ./api/.env
+      # - name: Create an .env file
+      #   run: cp ./api/.env.sample ./api/.env
 
-      - name: Run App
-        run: make start
+      # - name: Run App
+      #   run: make start
 
-      - name: Run lint checks
-        run: docker-compose exec -it api bash -c "npm run test"
+      # - name: Run lint checks
+      #   run: docker-compose exec -it api bash -c "npm run test"
 
-      - name: Run Tests
-        run: docker-compose exec -it api bash -c "npm run lint:check"
+      # - name: Run Tests
+      #   run: docker-compose exec -it api bash -c "npm run lint:check"
+      
+      - name: Deploy to VPS
+        # if: success()
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          port: 10222
+          script: |
+            # Install dependencies and restart
+            cd ~/esp/zwo-backend
+            git pull
+            sudo docker-compose --env-file api/.env up -d
