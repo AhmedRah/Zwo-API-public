@@ -4,40 +4,67 @@ import {
   Model,
   DataType,
   BelongsToMany,
+  HasMany,
 } from 'sequelize-typescript';
 import { USER_TABLE } from '../../core/constants';
 import { Post } from '../posts/post.entity';
 import { Like } from '../posts/like/like.entity';
 import { Share } from '../posts/share/share.entity';
+import { ApiHideProperty } from '@nestjs/swagger';
+import { Follower } from './followers/follower.entity';
+import { Animal } from '../animals/animal.entity';
+import { UserTypes } from './enums/user-types.enum';
+import { GetBase64Image } from '../../utils/media';
 
 @Table({ tableName: USER_TABLE })
 export class User extends Model<User> {
   @Column({
     type: DataType.STRING,
     unique: true,
+    validate: {
+      len: [3, 20],
+      regex: /^[a-zA-Z0-9_]*$/,
+    },
     allowNull: false,
   })
   username: string;
 
   @Column({
     type: DataType.STRING,
+    validate: {
+      len: [3, 25],
+    },
     allowNull: false,
   })
-  firstname: string;
+  displayName: string;
+
+  @Column({
+    type: DataType.ENUM,
+    values: Object.keys(UserTypes),
+    defaultValue: UserTypes.USER,
+  })
+  type: string;
 
   @Column({
     type: DataType.STRING,
-    allowNull: false,
+    validate: {
+      len: [0, 255],
+    },
   })
-  lastname: string;
+  bio: string;
 
   @Column({
     type: DataType.STRING,
     unique: true,
+    validate: {
+      len: [0, 255],
+      isEmail: true,
+    },
     allowNull: false,
   })
   email: string;
 
+  @ApiHideProperty()
   @Column({
     type: DataType.STRING,
     allowNull: false,
@@ -45,38 +72,131 @@ export class User extends Model<User> {
   password: string;
 
   @Column({
+    type: DataType.STRING,
+  })
+  avatar: string;
+
+  @Column({
+    type: DataType.STRING,
+  })
+  avatarColor: string;
+
+  @Column({
+    type: DataType.STRING,
+  })
+  avatarCustom: string;
+
+  @Column({
     type: DataType.ENUM,
-    // add whatever flavour of gender you want , could be remvoved entirely if it get's too  comp
     values: ['male', 'female', 'other'],
-    allowNull: true,
+    allowNull: false,
   })
   gender: string;
 
   @Column({
     type: DataType.DATE,
-    allowNull: true,
+    allowNull: false,
   })
   birthday: Date;
 
   @Column({
     type: DataType.ENUM,
-    // add more supported languages as the app gets more main stream
-    values: ['EN', 'FR', 'AR'],
-    allowNull: true,
+    values: ['FR'],
+    allowNull: false,
   })
   language: string;
 
   @Column({
     type: DataType.ENUM,
-    // add more supported languages as the app gets more main stream
-    values: ['USA', 'FRA'],
-    allowNull: true,
+    values: ['FRA'],
+    allowNull: false,
   })
   country: string;
 
+  @Column({
+    type: DataType.STRING,
+    validate: {
+      len: [0, 255],
+      isUrl: true,
+    },
+  })
+  websiteURL: string;
+
+  @Column({
+    type: DataType.STRING,
+    validate: {
+      len: [0, 255],
+      isUrl: true,
+    },
+  })
+  donationURL: string;
+
+  @ApiHideProperty()
+  @HasMany(() => Follower, 'followingId')
+  followers: User[];
+
+  @ApiHideProperty()
+  @HasMany(() => Follower, 'followerId')
+  following: User[];
+
+  @ApiHideProperty()
+  @HasMany(() => Animal, 'owner')
+  animals: Animal[];
+
+  @ApiHideProperty()
   @BelongsToMany(() => Post, () => Like)
   likes: Post[];
 
+  @ApiHideProperty()
   @BelongsToMany(() => Post, () => Share)
   shares: Post[];
+
+  get detailName() {
+    return {
+      id: this.id,
+      username: this.username,
+      displayName: this.displayName,
+      type: this.type,
+      avatar: this.avatarObject,
+    };
+  }
+
+  get profile() {
+    return {
+      id: this.id,
+      username: this.username,
+      displayName: this.displayName,
+      type: this.type,
+      avatar: this.avatarObject,
+      bio: this.bio,
+      websiteURL: this.websiteURL,
+      donationURL: this.donationURL,
+      following: false, // Is set in the service
+      followersCount: this.followers.length,
+      followingCount: this.following.length,
+      animals: this.animals?.map((animal) => animal.minProfile),
+      createdAt: this.createdAt,
+    };
+  }
+
+  private get avatarObject() {
+    let dir;
+    let avatar = this.avatar || 'default.png';
+    const color = this.avatarColor || 'ff914d'; // orange
+
+    if (
+      this.avatarCustom &&
+      [UserTypes.CERTIFIED, UserTypes.ASSOCIATION, UserTypes.COMPANY].includes(
+        this.type,
+      )
+    ) {
+      dir = process.env.UPLOAD_PATH_AVATAR;
+      avatar = this.avatarCustom;
+    }
+
+    return {
+      image: GetBase64Image(avatar, dir || process.env.PATH_AVATAR),
+      color: color,
+    };
+  }
 }

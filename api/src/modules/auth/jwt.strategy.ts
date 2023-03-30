@@ -32,11 +32,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: any) {
     // verify that the user in token data exist
     const user = await this.userService.findOneById(payload.id);
-    console.log(user);
 
     if (!user) {
-      throw new UnauthorizedException('Access denied');
+      throw new UnauthorizedException();
     }
-    return payload;
+
+    const currentUser = user['dataValues'];
+
+    // delete value not needed
+    delete currentUser.password;
+
+    return currentUser;
   }
 }

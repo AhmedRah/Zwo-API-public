@@ -12,7 +12,7 @@ import {
 } from '../../core/constants';
 import { AnimalDto } from './dto/animal.dto';
 import { AnimalBreed } from '../animal-breeds/animal-breeds.entity';
-import { UploadUtil } from '../../utils/upload';
+import { DeleteFile, SaveImage } from '../../utils/media';
 
 @Injectable()
 export class AnimalsService {
@@ -21,24 +21,11 @@ export class AnimalsService {
     private readonly animalRepository: typeof Animal,
     @Inject(ANIMALBREED_REPOSITORY)
     private readonly animalBreedRepository: typeof AnimalBreed,
-    private readonly uploadUtil: UploadUtil,
   ) {}
 
-  findAll(user: User): Promise<Animal[]> {
-    return this.animalRepository.findAll<Animal>({
-      where: { owner: user.id },
-      include: [
-        {
-          model: AnimalBreed,
-          as: 'breed',
-        },
-      ],
-    });
-  }
-
-  async findOne(id: string, user: User): Promise<Animal> {
+  async findOne(id: string) {
     const animal = await this.animalRepository.findOne<Animal>({
-      where: { id, owner: user.id },
+      where: { id },
       include: [
         {
           model: AnimalBreed,
@@ -49,50 +36,38 @@ export class AnimalsService {
     if (!animal) {
       throw new NotFoundException(`Animal #${id} not found`);
     }
-    return animal;
+    return animal.profile;
   }
 
   async create(
     animalDto: AnimalDto,
     user: User,
     animalFile?: Express.Multer.File,
-  ): Promise<Animal> {
-    const breed = await this.animalBreedRepository.findOne<AnimalBreed>({
-      where: { id: animalDto.breedId },
-    });
-
-    if (!breed) {
-      throw new BadRequestException(`Breed #${animalDto.breedId} not found`);
-    }
-
+  ): Promise<void> {
     const newAnimal: any = {
       ...animalDto,
       owner: user.id,
     };
 
+    let animal;
+    try {
+      animal = await this.animalRepository.create<Animal>(newAnimal);
+    } catch (e) {
+      throw new BadRequestException('Animal values are not valid');
+    }
+
     // Save animal file
     if (animalFile) {
-      newAnimal.avatar = await this.uploadUtil.saveImage(
+      const avatar = await SaveImage(
         animalFile,
         500,
         process.env.UPLOAD_PATH_ANIMALS,
       );
-    }
 
-    try {
-      const animal = await this.animalRepository.create<Animal>(newAnimal);
-
-      return this.animalRepository.findOne({
-        where: { id: animal.id },
-        include: [
-          {
-            model: AnimalBreed,
-            as: 'breed',
-          },
-        ],
-      });
-    } catch (e) {
-      throw new BadRequestException('Animal values are not valid');
+      await this.animalRepository.update(
+        { avatar },
+        { where: { id: animal.id } },
+      );
     }
   }
 
@@ -111,33 +86,53 @@ export class AnimalsService {
     }
 
     const updatedAnimal: any = {
-      ...animalDto,
+      name: animalDto.name,
+      description: animalDto.description,
+      birthday: animalDto.birthday,
+      weight: animalDto.weight,
+      breedId: animalDto.breedId,
     };
+
+    try {
+      await this.animalRepository.update(updatedAnimal, { where: { id } });
+    } catch (e) {
+      throw new BadRequestException('Animal values are not valid');
+    }
 
     // Delete old image
     // TODO: Trouver une solution pour supprimer l'ancienne image si on envoi null
     if (animalFile && animal.avatar) {
-      this.uploadUtil.deleteFile(
-        animal.avatar,
-        process.env.UPLOAD_PATH_ANIMALS,
-      );
+      DeleteFile(animal.avatar, process.env.UPLOAD_PATH_ANIMALS);
     }
 
     // Save animal file
     if (animalFile) {
-      updatedAnimal.avatar = await this.uploadUtil.saveImage(
+      const avatar = await SaveImage(
         animalFile,
         500,
         process.env.UPLOAD_PATH_ANIMALS,
       );
-    }
 
-    await this.animalRepository.update(updatedAnimal, { where: { id } });
+      await this.animalRepository.update({ avatar }, { where: { id } });
+    }
   }
 
   async remove(id: string, user: User): Promise<void> {
-    await this.animalRepository.destroy({
+    const animal = await this.animalRepository.findOne({
       where: { id, owner: user.id },
+    });
+
+    if (!animal) {
+      throw new BadRequestException();
+    }
+
+    // Remove avatar if exists
+    if (animal.avatar) {
+      DeleteFile(animal.avatar, process.env.UPLOAD_PATH_ANIMALS);
+    }
+
+    await this.animalRepository.destroy({
+      where: { id: animal.id },
     });
   }
 }

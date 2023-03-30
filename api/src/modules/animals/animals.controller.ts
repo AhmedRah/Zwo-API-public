@@ -1,7 +1,5 @@
 import {
   ApiBadRequestResponse,
-  ApiBearerAuth,
-  ApiBody,
   ApiNotFoundResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -20,39 +18,33 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { AnimalsService } from './animals.service';
-import { Animal } from './animal.entity';
 import { AuthGuard } from '@nestjs/passport';
 import { AnimalDto } from './dto/animal.dto';
 import { FileSizeValidationPipe } from '../../pipes/file-size-validation.pipe';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('animals')
-@ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'))
 @Controller('animals')
 export class AnimalsController {
   constructor(private animalsService: AnimalsService) {}
 
-  @Get()
-  findAll(@Request() req): Promise<Animal[]> {
-    return this.animalsService.findAll(req.user);
-  }
-
   @ApiNotFoundResponse({ description: 'Not found' })
   @Get(':id')
-  findOne(@Request() req, @Param('id') id: string): Promise<Animal> {
-    return this.animalsService.findOne(id, req.user);
+  findOne(@Param('id') id: string) {
+    return this.animalsService.findOne(id);
   }
 
   @ApiBadRequestResponse({ description: 'Bad request' })
   @UseInterceptors(FileInterceptor('animalFile'))
+  @HttpCode(201)
   @Post()
   create(
     @Request() req,
     @Body() animalDto: AnimalDto,
     @UploadedFile(new FileSizeValidationPipe())
     animalFile?: Express.Multer.File,
-  ): Promise<Animal> {
+  ): Promise<void> {
     return this.animalsService.create(animalDto, req.user, animalFile);
   }
 

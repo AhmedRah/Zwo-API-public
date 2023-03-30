@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AnimalBreedsService } from './animal-breeds.service';
 import { animalBreedsProviders } from './animal-breeds.providers';
 
+/*
 const listTypes = [
   {
     type: 'dog',
@@ -18,6 +19,7 @@ const listTypes = [
 ];
 
 const listBreedsByCat = ['persian', 'siamese', 'ragdoll'];
+ */
 
 describe('AnimalBreedsService', () => {
   let service: AnimalBreedsService;
