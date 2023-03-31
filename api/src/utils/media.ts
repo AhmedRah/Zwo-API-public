@@ -6,21 +6,11 @@ import { join } from 'path';
 
 export async function SaveImage(
   image: Express.Multer.File,
-  size: number | { width: number; height: number },
   dir: string,
 ): Promise<string> {
   const filename = uuid() + '.webp';
 
-  if (typeof size === 'number') {
-    size = { width: size, height: size };
-  }
-
-  await sharp(image.buffer)
-    .resize(size.width, size.height, {
-      position: sharp.strategy.cover, // Automatically crop to cover the entire image
-    })
-    .webp()
-    .toFile(path.join(dir, filename));
+  await sharp(image.buffer).webp().toFile(path.join(dir, filename));
 
   return filename;
 }

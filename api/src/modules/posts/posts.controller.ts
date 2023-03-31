@@ -63,7 +63,7 @@ export class PostsController {
     const postData = {
       content: postDto.content,
       postImage: postImages
-        ? await SaveImage(postImages, 500, process.env.UPLOAD_PATH_POSTS)
+        ? await SaveImage(postImages, process.env.UPLOAD_PATH_POSTS)
         : null,
     };
     await this.postService
