@@ -51,7 +51,6 @@ export class Post extends Model<Post> {
       id: this.id,
       content: this.content,
       postImage: GetBase64Image(this.postImage, process.env.UPLOAD_PATH_POSTS),
-      author: this.author,
     };
   }
 }

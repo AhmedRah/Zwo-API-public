@@ -20,7 +20,6 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { FileSizeValidationPipe } from '../../pipes/file-size-validation.pipe';
 import { SaveImage } from '../../utils/media';
 
-import * as fs from 'fs';
 import { ValidationException } from '../../utils/error';
 
 @ApiTags('posts')
@@ -37,7 +36,10 @@ export class PostsController {
       throw new NotFoundException('No posts found');
     }
 
-    return posts;
+    return posts.rows.map((post) => ({
+      ...post.details,
+      author: post.user.detailName,
+    }));
   }
 
   @Get(':id')
@@ -49,13 +51,7 @@ export class PostsController {
     if (!post) {
       throw new NotFoundException("This Post doesn't exist");
     }
-
-    const path = `${process.env.UPLOAD_PATH_POSTS}/${post.postImage}`;
-    const imageStream = fs.readFileSync(path);
-
-    post.postImage = imageStream.toString('base64');
-
-    return post;
+    return { ...post.details, author: post.user.detailName };
   }
 
   @UseGuards(AuthGuard('jwt'))
