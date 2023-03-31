@@ -87,6 +87,11 @@ export class User extends Model<User> {
   avatarCustom: string;
 
   @Column({
+    type: DataType.STRING,
+  })
+  background: string;
+
+  @Column({
     type: DataType.ENUM,
     values: ['male', 'female', 'other'],
     allowNull: false,
@@ -168,6 +173,7 @@ export class User extends Model<User> {
       displayName: this.displayName,
       type: this.type,
       avatar: this.avatarObject,
+      background: this.background64,
       bio: this.bio,
       websiteURL: this.websiteURL,
       donationURL: this.donationURL,
@@ -198,5 +204,10 @@ export class User extends Model<User> {
       image: GetBase64Image(avatar, dir || process.env.PATH_AVATAR),
       color: color,
     };
+  }
+
+  private get background64() {
+    const background = this.background || 'default.jpg';
+    return GetBase64Image(background, process.env.PATH_BACKGROUND);
   }
 }

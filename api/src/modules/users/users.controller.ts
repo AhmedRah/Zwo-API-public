@@ -22,6 +22,8 @@ import { UserTypes } from './enums/user-types.enum';
 const avatars = require('../../../data/avatars.json');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const colors = require('../../../data/colors.json');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const backgrounds = require('../../../data/backgrounds.json');
 
 @ApiTags('users')
 @UseGuards(AuthGuard('jwt'))
@@ -71,6 +73,17 @@ export class UsersController {
         throw new BadRequestException('Color not found');
       }
       newData.avatarColor = color.color;
+    }
+
+    if (userUpdateDto.backgroundId) {
+      // Search in file if background exists
+      const background = backgrounds.data.find(
+        (background: any) => background.id == userUpdateDto.backgroundId,
+      );
+      if (!background) {
+        throw new BadRequestException('Background not found');
+      }
+      newData.background = background.background;
     }
 
     if ([UserTypes.COMPANY, UserTypes.ASSOCIATION].includes(req.user.type)) {
