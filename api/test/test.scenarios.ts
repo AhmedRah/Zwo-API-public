@@ -46,6 +46,11 @@ export const usersTest = {
     failed_avatar_color: {
       avatarColorId: 'greeen',
     },
+    failed_validation: {
+      displayName: 'Marky mark',
+      bio: 'This should create a validation problem',
+      username: 'd',
+    },
   },
 };
 

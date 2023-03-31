@@ -1,4 +1,7 @@
-import { BadRequestException } from '@nestjs/common';
+import {
+  BadRequestException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { ValidationException } from '../../utils/error';
@@ -66,41 +69,35 @@ describe('UsersController', () => {
 
       await expect(
         controller.updateMe(
-          { user: { id: 1, type: UserTypes.USER } },
+          { user: { id: usersTest.updateMe.userId, type: UserTypes.USER } },
           userUpdateDto,
         ),
       ).rejects.toThrow(BadRequestException);
     });
 
-    // it('should throw a BadRequestException if color is not found', async () => {
-    //   const userUpdateDto: UserUpdateDto = { avatarColorId: 1000 };
-    //   jest.spyOn(service, 'update').mockImplementation(() => Promise.reject());
+    it('should throw a BadRequestException if color is not found', async () => {
+      const userUpdateDto: UserUpdateDto =
+        usersTest.updateMe.failed_avatar_color;
+      jest.spyOn(service, 'update').mockImplementation(() => Promise.reject());
 
-    //   await expect(
-    //     controller.updateMe(
-    //       { user: { id: 1, type: UserTypes.USER } },
-    //       userUpdateDto,
-    //     ),
-    //   ).rejects.toThrow(BadRequestException);
-    // });
+      await expect(
+        controller.updateMe(
+          { user: { id: usersTest.updateMe.userId, type: UserTypes.USER } },
+          userUpdateDto,
+        ),
+      ).rejects.toThrow(BadRequestException);
+    });
 
-    // it('should catch and handle a ValidationException', async () => {
-    //   const userUpdateDto: UserUpdateDto = {
-    //     displayName: 'Jane Doe',
-    //     bio: 'Hello, world!',
-    //   };
-    //   jest
-    //     .spyOn(service, 'update')
-    //     .mockImplementation(() =>
-    //       Promise.reject(new ValidationException('Validation failed')),
-    //     );
+    it('should catch and handle a InternalServerErrorException', async () => {
+      const userUpdateDto: UserUpdateDto = usersTest.updateMe.failed_validation;
+      jest.spyOn(service, 'update').mockImplementation(() => Promise.reject());
 
-    //   await expect(
-    //     controller.updateMe(
-    //       { user: { id: 1, type: UserTypes.USER } },
-    //       userUpdateDto,
-    //     ),
-    //   ).resolves.toBeUndefined();
-    // });
+      await expect(
+        controller.updateMe(
+          { user: { id: usersTest.updateMe.userId, type: UserTypes.USER } },
+          userUpdateDto,
+        ),
+      ).rejects.toThrow(InternalServerErrorException);
+    });
   });
 });
