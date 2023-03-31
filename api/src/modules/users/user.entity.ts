@@ -151,6 +151,10 @@ export class User extends Model<User> {
   @BelongsToMany(() => Post, () => Share)
   shares: Post[];
 
+  @ApiHideProperty()
+  @HasMany(() => Post, 'author')
+  posts: Post[];
+
   get detailName() {
     return {
       id: this.id,
