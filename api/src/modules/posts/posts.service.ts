@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, BadRequestException } from '@nestjs/common';
 import { PostDto } from './dto/post.dto';
 import { Post } from './post.entity';
 
@@ -16,6 +16,9 @@ export class PostsService {
   }
 
   async findAll(page = 1, limit = 10): Promise<any> {
+    if (page < 1 || limit < 1 || limit > +process.env.MAX_PAGE_SIZE) {
+      throw new BadRequestException();
+    }
     const offset = (page - 1) * limit;
     const { count, rows } = await this.postRepository.findAndCountAll({
       offset,

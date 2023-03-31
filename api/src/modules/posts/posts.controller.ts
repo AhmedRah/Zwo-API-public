@@ -6,7 +6,6 @@ import {
   NotFoundException,
   Param,
   Post,
-  Put,
   Query,
   Request,
   UploadedFile,
@@ -15,26 +14,35 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { PostsService } from './posts.service';
-import { PostDto } from './dto/post.dto';
 import { Post as PostEntity } from './post.entity';
 import { ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FileSizeValidationPipe } from '../../pipes/file-size-validation.pipe';
-import { UploadUtil } from '../../utils/upload';
+import { SaveImage } from '../../utils/media';
+
 import * as fs from 'fs';
 
 @ApiTags('posts')
 @Controller('posts')
 export class PostsController {
-  constructor(
-    private readonly postService: PostsService,
-    private readonly uploadUtil: UploadUtil,
-  ) {}
+  constructor(private readonly postService: PostsService) {}
 
   @Get()
   async findAll(@Query('page') page: number, @Query('limit') limit: number) {
     // get all posts in the db
-    return await this.postService.findAll(page, limit);
+    const posts = await this.postService.findAll(page, limit);
+
+    if (posts.rows.length === 0) {
+      throw new NotFoundException('No posts found');
+    }
+
+    posts.rows.forEach((post) => {
+      const path = `${process.env.UPLOAD_PATH_POSTS}/${post.postImage}`;
+      const imageStream = fs.readFileSync(path);
+      post.postImage = imageStream.toString('base64');
+    });
+
+    return posts;
   }
 
   @Get(':id')
@@ -46,14 +54,13 @@ export class PostsController {
     if (!post) {
       throw new NotFoundException("This Post doesn't exist");
     }
-    // return post;
-    const path = `${process.env.UPLOAD_PATH_ANIMALS}/${post.postImage}`;
-    const imageStream = fs.readFileSync(path);
-    const data = imageStream.toString('base64');
-    // if post exist, return the post
-    // post.postImage = imageStream;
 
-    return data;
+    const path = `${process.env.UPLOAD_PATH_POSTS}/${post.postImage}`;
+    const imageStream = fs.readFileSync(path);
+
+    post.postImage = imageStream.toString('base64');
+
+    return post;
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -69,38 +76,10 @@ export class PostsController {
     const postData = {
       content: bodyFormFields.content,
       postImage: postImages
-        ? await this.uploadUtil.saveImage(
-            postImages,
-            500,
-            process.env.UPLOAD_PATH_ANIMALS,
-          )
+        ? await SaveImage(postImages, 500, process.env.UPLOAD_PATH_POSTS)
         : null,
     };
     return await this.postService.create(postData, req.user.id);
-  }
-
-  @UseGuards(AuthGuard('jwt'))
-  @Put(':id')
-  async update(
-    @Param('id') id: number,
-    @Body() post: PostDto,
-    @Request() req,
-  ): Promise<PostEntity> {
-    // get the number of row affected and the updated post
-    const { numberOfAffectedRows, updatedPost } = await this.postService.update(
-      id,
-      post,
-      req.user.id,
-    );
-
-    // if the number of row affected is zero,
-    // it means the post doesn't exist in our db
-    if (numberOfAffectedRows === 0) {
-      throw new NotFoundException("This Post doesn't exist");
-    }
-
-    // return the updated post
-    return updatedPost;
   }
 
   @UseGuards(AuthGuard('jwt'))
