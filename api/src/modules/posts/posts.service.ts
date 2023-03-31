@@ -24,7 +24,7 @@ export class PostsService {
       offset,
       limit,
     });
-    return { rows, count };
+    return { rows: rows.map((post) => post.details), count };
   }
 
   async findOne(id): Promise<Post> {

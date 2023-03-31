@@ -21,6 +21,7 @@ import { FileSizeValidationPipe } from '../../pipes/file-size-validation.pipe';
 import { SaveImage } from '../../utils/media';
 
 import * as fs from 'fs';
+import { ValidationException } from '../../utils/error';
 
 @ApiTags('posts')
 @Controller('posts')
@@ -35,12 +36,6 @@ export class PostsController {
     if (posts.rows.length === 0) {
       throw new NotFoundException('No posts found');
     }
-
-    posts.rows.forEach((post) => {
-      const path = `${process.env.UPLOAD_PATH_POSTS}/${post.postImage}`;
-      const imageStream = fs.readFileSync(path);
-      post.postImage = imageStream.toString('base64');
-    });
 
     return posts;
   }
@@ -71,7 +66,7 @@ export class PostsController {
     @Body() bodyFormFields,
     @UploadedFile(new FileSizeValidationPipe())
     postImages?: Express.Multer.File,
-  ): Promise<PostEntity> {
+  ): Promise<PostEntity | void> {
     // create a new post and return the newly created post
     const postData = {
       content: bodyFormFields.content,
@@ -79,7 +74,9 @@ export class PostsController {
         ? await SaveImage(postImages, 500, process.env.UPLOAD_PATH_POSTS)
         : null,
     };
-    return await this.postService.create(postData, req.user.id);
+    return await this.postService
+      .create(postData, req.user.id)
+      .catch((err) => ValidationException(err));
   }
 
   @UseGuards(AuthGuard('jwt'))
