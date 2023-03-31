@@ -38,7 +38,9 @@ export const databaseProviders = [
         Like,
         Share,
       ]);
-      await sequelize.sync();
+      await sequelize.sync({
+        force: process.env.SEQUELIZE_SYNC_FORCE === 'true',
+      });
       return sequelize;
     },
   },

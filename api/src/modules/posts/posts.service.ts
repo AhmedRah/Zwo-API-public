@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, BadRequestException } from '@nestjs/common';
 import { PostDto } from './dto/post.dto';
 import { Post } from './post.entity';
 
@@ -9,11 +9,22 @@ export class PostsService {
   ) {}
 
   async create(post: PostDto, author): Promise<Post> {
-    return await this.postRepository.create<Post>({ ...post, author });
+    return await this.postRepository.create<Post>({
+      ...post,
+      author,
+    });
   }
 
-  async findAll(): Promise<Post[]> {
-    return await this.postRepository.findAll<Post>();
+  async findAll(page = 1, limit = 10): Promise<any> {
+    if (page < 1 || limit < 1 || limit > +process.env.MAX_PAGE_SIZE) {
+      throw new BadRequestException();
+    }
+    const offset = (page - 1) * limit;
+    const { count, rows } = await this.postRepository.findAndCountAll({
+      offset,
+      limit,
+    });
+    return { rows: rows.map((post) => post.details), count };
   }
 
   async findOne(id): Promise<Post> {

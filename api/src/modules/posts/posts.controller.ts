@@ -1,20 +1,27 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Delete,
-  Param,
   Body,
+  Controller,
+  Delete,
+  Get,
   NotFoundException,
-  UseGuards,
+  Param,
+  Post,
+  Query,
   Request,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { PostsService } from './posts.service';
-import { PostDto } from './dto/post.dto';
 import { Post as PostEntity } from './post.entity';
 import { ApiTags } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { FileSizeValidationPipe } from '../../pipes/file-size-validation.pipe';
+import { SaveImage } from '../../utils/media';
+
+import * as fs from 'fs';
+import { ValidationException } from '../../utils/error';
 
 @ApiTags('posts')
 @Controller('posts')
@@ -22,13 +29,19 @@ export class PostsController {
   constructor(private readonly postService: PostsService) {}
 
   @Get()
-  async findAll() {
+  async findAll(@Query('page') page: number, @Query('limit') limit: number) {
     // get all posts in the db
-    return await this.postService.findAll();
+    const posts = await this.postService.findAll(page, limit);
+
+    if (posts.rows.length === 0) {
+      throw new NotFoundException('No posts found');
+    }
+
+    return posts;
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: number): Promise<PostEntity> {
+  async findOne(@Param('id') id: number): Promise<any> {
     // find the post with this id
     const post = await this.postService.findOne(id);
 
@@ -37,39 +50,33 @@ export class PostsController {
       throw new NotFoundException("This Post doesn't exist");
     }
 
-    // if post exist, return the post
+    const path = `${process.env.UPLOAD_PATH_POSTS}/${post.postImage}`;
+    const imageStream = fs.readFileSync(path);
+
+    post.postImage = imageStream.toString('base64');
+
     return post;
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Post()
-  async create(@Body() post: PostDto, @Request() req): Promise<PostEntity> {
-    // create a new post and return the newly created post
-    return await this.postService.create(post, req.user.id);
-  }
-
-  @UseGuards(AuthGuard('jwt'))
-  @Put(':id')
-  async update(
-    @Param('id') id: number,
-    @Body() post: PostDto,
+  @UseInterceptors(FileInterceptor('postImage'))
+  async create(
     @Request() req,
-  ): Promise<PostEntity> {
-    // get the number of row affected and the updated post
-    const { numberOfAffectedRows, updatedPost } = await this.postService.update(
-      id,
-      post,
-      req.user.id,
-    );
-
-    // if the number of row affected is zero,
-    // it means the post doesn't exist in our db
-    if (numberOfAffectedRows === 0) {
-      throw new NotFoundException("This Post doesn't exist");
-    }
-
-    // return the updated post
-    return updatedPost;
+    @Body() bodyFormFields,
+    @UploadedFile(new FileSizeValidationPipe())
+    postImages?: Express.Multer.File,
+  ): Promise<PostEntity | void> {
+    // create a new post and return the newly created post
+    const postData = {
+      content: bodyFormFields.content,
+      postImage: postImages
+        ? await SaveImage(postImages, 500, process.env.UPLOAD_PATH_POSTS)
+        : null,
+    };
+    return await this.postService
+      .create(postData, req.user.id)
+      .catch((err) => ValidationException(err));
   }
 
   @UseGuards(AuthGuard('jwt'))

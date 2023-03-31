@@ -9,5 +9,6 @@ import { SharesModule } from './share/shares.module';
   imports: [LikesModule, SharesModule],
   controllers: [PostsController],
   providers: [PostsService, ...postsProviders],
+  exports: [PostsService],
 })
 export class PostsModule {}
