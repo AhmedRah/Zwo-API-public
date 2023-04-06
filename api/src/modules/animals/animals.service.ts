@@ -60,7 +60,6 @@ export class AnimalsService {
     if (animalFile) {
       const avatar = await SaveImage(
         animalFile,
-        500,
         process.env.UPLOAD_PATH_ANIMALS,
       );
 
@@ -109,7 +108,6 @@ export class AnimalsService {
     if (animalFile) {
       const avatar = await SaveImage(
         animalFile,
-        500,
         process.env.UPLOAD_PATH_ANIMALS,
       );
 

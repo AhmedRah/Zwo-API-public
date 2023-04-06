@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   NotFoundException,
   Param,
   Post,
@@ -14,32 +15,26 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { PostsService } from './posts.service';
-import { Post as PostEntity } from './post.entity';
 import { ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FileSizeValidationPipe } from '../../pipes/file-size-validation.pipe';
 import { SaveImage } from '../../utils/media';
-
 import { ValidationException } from '../../utils/error';
+import { PostDto } from './dto/post.dto';
 
 @ApiTags('posts')
+@UseGuards(AuthGuard('jwt'))
 @Controller('posts')
 export class PostsController {
   constructor(private readonly postService: PostsService) {}
 
   @Get()
-  async findAll(@Query('page') page: number, @Query('limit') limit: number) {
-    // get all posts in the db
-    const posts = await this.postService.findAll(page, limit);
-
-    if (posts.rows.length === 0) {
-      throw new NotFoundException('No posts found');
-    }
-
-    return posts.rows.map((post) => ({
-      ...post.details,
-      author: post.user.detailName,
-    }));
+  async findAll(
+    @Request() req,
+    @Query('page') page: number,
+    @Query('limit') limit: number,
+  ) {
+    return this.postService.findAll(req.user, page, limit);
   }
 
   @Get(':id')
@@ -54,40 +49,30 @@ export class PostsController {
     return { ...post.details, author: post.user.detailName };
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @HttpCode(201)
   @Post()
   @UseInterceptors(FileInterceptor('postImage'))
   async create(
     @Request() req,
-    @Body() bodyFormFields,
+    @Body() postDto: PostDto,
     @UploadedFile(new FileSizeValidationPipe())
     postImages?: Express.Multer.File,
-  ): Promise<PostEntity | void> {
+  ): Promise<any> {
     // create a new post and return the newly created post
     const postData = {
-      content: bodyFormFields.content,
+      content: postDto.content,
       postImage: postImages
-        ? await SaveImage(postImages, 500, process.env.UPLOAD_PATH_POSTS)
+        ? await SaveImage(postImages, process.env.UPLOAD_PATH_POSTS)
         : null,
     };
-    return await this.postService
+    await this.postService
       .create(postData, req.user.id)
       .catch((err) => ValidationException(err));
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @HttpCode(204)
   @Delete(':id')
   async remove(@Param('id') id: number, @Request() req) {
-    // delete the post with this id
-    const deleted = await this.postService.delete(id, req.user.id);
-
-    // if the number of row affected is zero,
-    // then the post doesn't exist in our db
-    if (deleted === 0) {
-      throw new NotFoundException("This Post doesn't exist");
-    }
-
-    // return success message
-    return 'Successfully deleted';
+    await this.postService.delete(id, req.user.id);
   }
 }
