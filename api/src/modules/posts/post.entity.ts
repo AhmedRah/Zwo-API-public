@@ -16,7 +16,6 @@ import { GetBase64Image } from '../../utils/media';
 export class Post extends Model<Post> {
   @Column({
     type: DataType.STRING,
-    allowNull: false,
     validate: {
       len: [0, 1000],
     },

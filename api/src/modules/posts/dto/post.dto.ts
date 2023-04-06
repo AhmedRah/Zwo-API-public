@@ -1,3 +1,3 @@
 export class PostDto {
-  readonly content: string;
+  readonly content?: string = null;
 }

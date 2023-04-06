@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -58,7 +59,11 @@ export class PostsController {
     @UploadedFile(new FileSizeValidationPipe())
     postImages?: Express.Multer.File,
   ): Promise<any> {
-    // create a new post and return the newly created post
+    // Check if content or image is provided
+    if (!postDto.content && !postImages) {
+      throw new BadRequestException('content or postImage is required');
+    }
+
     const postData = {
       content: postDto.content,
       postImage: postImages
