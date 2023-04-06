@@ -70,9 +70,15 @@ export class PostsController {
         ? await SaveImage(postImages, process.env.UPLOAD_PATH_POSTS)
         : null,
     };
-    await this.postService
-      .create(postData, req.user.id)
-      .catch((err) => ValidationException(err));
+
+    try {
+      const res = await this.postService.create(postData, req.user.id);
+      return {
+        id: res.id,
+      };
+    } catch (err) {
+      ValidationException(err);
+    }
   }
 
   @HttpCode(204)

@@ -43,7 +43,7 @@ export class AnimalsService {
     animalDto: AnimalDto,
     user: User,
     animalFile?: Express.Multer.File,
-  ): Promise<void> {
+  ) {
     const newAnimal: any = {
       ...animalDto,
       owner: user.id,
@@ -68,6 +68,10 @@ export class AnimalsService {
         { where: { id: animal.id } },
       );
     }
+
+    return {
+      id: animal.id,
+    };
   }
 
   async update(

@@ -37,14 +37,13 @@ export class AnimalsController {
 
   @ApiBadRequestResponse({ description: 'Bad request' })
   @UseInterceptors(FileInterceptor('animalFile'))
-  @HttpCode(201)
   @Post()
   create(
     @Request() req,
     @Body() animalDto: AnimalDto,
     @UploadedFile(new FileSizeValidationPipe())
     animalFile?: Express.Multer.File,
-  ): Promise<void> {
+  ) {
     return this.animalsService.create(animalDto, req.user, animalFile);
   }
 
