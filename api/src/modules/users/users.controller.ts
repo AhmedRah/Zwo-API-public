@@ -111,9 +111,9 @@ export class UsersController {
   @Get(':id/posts')
   async findPosts(@Param('id') id: string) {
     const posts = await this.usersService.findPosts(+id);
-    return {
-      ...posts.detailName,
-      posts: posts.posts.map((p) => p.details),
-    };
+    return posts.posts.map((p) => ({
+      ...p.details,
+      author: posts.detailName,
+    }));
   }
 }
