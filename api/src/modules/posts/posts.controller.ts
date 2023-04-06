@@ -34,12 +34,7 @@ export class PostsController {
     @Query('page') page: number,
     @Query('limit') limit: number,
   ) {
-    const posts = await this.postService.findAll(req.user, page, limit);
-
-    return posts.rows.map((post) => ({
-      ...post.details,
-      author: post.user.detailName,
-    }));
+    return this.postService.findAll(req.user, page, limit);
   }
 
   @Get(':id')

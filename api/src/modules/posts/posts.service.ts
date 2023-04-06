@@ -46,8 +46,14 @@ export class PostsService {
       include: 'user',
     });
 
-    return { rows, count };
-}
+    return {
+      rows: rows.map((post) => ({
+        ...post.details,
+        author: post.user.detailName,
+      })),
+      count,
+    };
+  }
 
   async findOne(id): Promise<Post> {
     return await this.postRepository.findOne({
