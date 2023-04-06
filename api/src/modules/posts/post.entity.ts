@@ -15,6 +15,17 @@ import { GetBase64Image } from '../../utils/media';
 @Table
 export class Post extends Model<Post> {
   @Column({
+    type: DataType.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  })
+  id: number;
+
+  @ForeignKey(() => Post)
+  @Column
+  parentId: number;
+
+  @Column({
     type: DataType.STRING,
     validate: {
       len: [0, 1000],
@@ -35,6 +46,12 @@ export class Post extends Model<Post> {
   })
   postImage: string;
 
+  @BelongsTo(() => Post, { onDelete: 'CASCADE' })
+  parent: Post;
+
+  @BelongsToMany(() => Post, () => Post, 'parentId', 'id')
+  children: Post[];
+
   @BelongsTo(() => User)
   user: User;
 
@@ -47,10 +64,12 @@ export class Post extends Model<Post> {
   get details() {
     return {
       id: this.id,
+      parentId: this.parentId,
       content: this.content,
       postImage: this.postImage
         ? GetBase64Image(this.postImage, process.env.UPLOAD_PATH_POSTS)
         : null,
+      children: this.children?.length || 0,
       createdAt: this.createdAt,
     };
   }
