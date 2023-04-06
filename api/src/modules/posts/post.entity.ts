@@ -26,7 +26,7 @@ export class Post extends Model<Post> {
   parentId: number;
 
   @Column({
-    type: DataType.STRING,
+    type: DataType.TEXT,
     validate: {
       len: [0, 1000],
     },
