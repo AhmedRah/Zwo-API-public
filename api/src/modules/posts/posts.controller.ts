@@ -34,7 +34,12 @@ export class PostsController {
     @Query('page') page: number,
     @Query('limit') limit: number,
   ) {
-    return await this.postService.findAll(req.user, page, limit);
+    const posts = await this.postService.findAll(req.user, page, limit);
+
+    return posts.rows.map((post) => ({
+      ...post.details,
+      author: post.user.detailName,
+    }));
   }
 
   @Get(':id')
@@ -46,8 +51,7 @@ export class PostsController {
     if (!post) {
       throw new NotFoundException("This Post doesn't exist");
     }
-
-    return post.details;
+    return { ...post.details, author: post.user.detailName };
   }
 
   @HttpCode(201)
