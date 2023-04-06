@@ -132,4 +132,10 @@ export class UsersService {
 
     return following.map((f) => f.detailName);
   }
+  async findPosts(id: number) {
+    return await this.userRepository.findOne({
+      where: { id },
+      include: 'posts',
+    });
+  }
 }

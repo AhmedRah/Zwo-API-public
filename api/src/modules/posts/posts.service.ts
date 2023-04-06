@@ -1,11 +1,12 @@
 import { Injectable, Inject, BadRequestException } from '@nestjs/common';
 import { PostDto } from './dto/post.dto';
 import { Post } from './post.entity';
+import { POST_REPOSITORY } from '../../core/constants';
 
 @Injectable()
 export class PostsService {
   constructor(
-    @Inject('POST_REPOSITORY') private readonly postRepository: typeof Post,
+    @Inject(POST_REPOSITORY) private readonly postRepository: typeof Post,
   ) {}
 
   async create(post: PostDto, author): Promise<Post> {
@@ -23,27 +24,19 @@ export class PostsService {
     const { count, rows } = await this.postRepository.findAndCountAll({
       offset,
       limit,
+      include: 'user',
     });
-    return { rows: rows.map((post) => post.details), count };
+    return { rows, count };
   }
 
   async findOne(id): Promise<Post> {
     return await this.postRepository.findOne({
       where: { id },
+      include: 'user',
     });
   }
 
   async delete(id, author) {
     return await this.postRepository.destroy({ where: { id, author } });
-  }
-
-  async update(id, data, author) {
-    const [numberOfAffectedRows, [updatedPost]] =
-      await this.postRepository.update(
-        { ...data },
-        { where: { id, author }, returning: true },
-      );
-
-    return { numberOfAffectedRows, updatedPost };
   }
 }
