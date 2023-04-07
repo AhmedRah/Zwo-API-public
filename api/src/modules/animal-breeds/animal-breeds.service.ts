@@ -13,13 +13,12 @@ export class AnimalBreedsService {
   async findTypes() {
     const animalBreeds = await this.animalBreedRepository.findAll<any>({
       where: { breed: { [sequelize.Op.eq]: null } },
-      order: [['type', 'ASC']],
+      order: [['order', 'ASC']],
     });
 
     // Get the number of breeds for each type
     const breeds = await this.animalBreedRepository.findAll<any>({
       attributes: ['type', [sequelize.fn('COUNT', 'breed'), 'nbBreeds']],
-      order: [['type', 'ASC']],
       group: ['type'],
     });
 
@@ -36,7 +35,7 @@ export class AnimalBreedsService {
   async findBreeds(type: string) {
     const animalBreeds = await this.animalBreedRepository.findAll<any>({
       where: { type, breed: { [sequelize.Op.not]: null } },
-      order: [['breed', 'ASC']],
+      order: [['translation', 'ASC']],
     });
     if (animalBreeds.length === 0) {
       throw new NotFoundException(`No breeds found`);
