@@ -1,3 +1,4 @@
 export class PostDto {
-  readonly content: string;
+  readonly parentId?: number = null;
+  readonly content?: string = null;
 }

@@ -1,4 +1,9 @@
-import { Injectable, Inject, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Op } from 'sequelize';
 import { PostDto } from './dto/post.dto';
 import { Post } from './post.entity';
@@ -19,12 +24,27 @@ export class PostsService {
     });
   }
 
-  async findAll(user, page = 1, limit = 10): Promise<any> {
+  async findAll(
+    user,
+    parentId: number = null,
+    page = 1,
+    limit = 10,
+  ): Promise<any> {
     if (page < 1 || limit < 1 || limit > +process.env.MAX_PAGE_SIZE) {
       throw new BadRequestException();
     }
 
     const offset = (page - 1) * limit;
+
+    // If parentId is set, check if the post exists
+    if (parentId) {
+      const parentPost = await this.postRepository.findOne({
+        where: { id: parentId },
+      });
+      if (!parentPost) {
+        throw new NotFoundException();
+      }
+    }
 
     // Get user's following ids
     const followings = await this.userRepository.findAll({
@@ -32,7 +52,7 @@ export class PostsService {
       where: {
         '$followers.followerId$': user.id,
       },
-      include: 'followers',
+      include: ['followers'],
     });
 
     const { count, rows } = await this.postRepository.findAndCountAll({
@@ -40,10 +60,12 @@ export class PostsService {
         author: {
           [Op.in]: [user.id, ...followings.map((user) => user.id)],
         },
+        parentId: parentId,
       },
+      order: [['createdAt', 'DESC']],
       offset,
       limit,
-      include: 'user',
+      include: ['user', 'children'],
     });
 
     return {
@@ -63,6 +85,9 @@ export class PostsService {
   }
 
   async delete(id, author) {
-    return await this.postRepository.destroy({ where: { id, author } });
+    return await this.postRepository.destroy({
+      where: { id, author },
+      cascade: true,
+    });
   }
 }

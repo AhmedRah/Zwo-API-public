@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -15,7 +16,7 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { PostsService } from './posts.service';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiQuery, ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FileSizeValidationPipe } from '../../pipes/file-size-validation.pipe';
 import { SaveImage } from '../../utils/media';
@@ -28,13 +29,18 @@ import { PostDto } from './dto/post.dto';
 export class PostsController {
   constructor(private readonly postService: PostsService) {}
 
+  @ApiQuery({
+    name: 'parentId',
+    required: false,
+  })
   @Get()
   async findAll(
     @Request() req,
+    @Query('parentId') parentId: number,
     @Query('page') page: number,
     @Query('limit') limit: number,
   ) {
-    return this.postService.findAll(req.user, page, limit);
+    return this.postService.findAll(req.user, parentId, page, limit);
   }
 
   @Get(':id')
@@ -49,7 +55,6 @@ export class PostsController {
     return { ...post.details, author: post.user.detailName };
   }
 
-  @HttpCode(201)
   @Post()
   @UseInterceptors(FileInterceptor('postImage'))
   async create(
@@ -58,16 +63,35 @@ export class PostsController {
     @UploadedFile(new FileSizeValidationPipe())
     postImages?: Express.Multer.File,
   ): Promise<any> {
-    // create a new post and return the newly created post
+    // Check if content or image is provided
+    if (!postDto.content && !postImages) {
+      throw new BadRequestException('content or postImage is required');
+    }
+
+    // If parent id is set, check if the post exists
+    if (postDto.parentId) {
+      const parentPost = await this.postService.findOne(postDto.parentId);
+      if (!parentPost) {
+        throw new BadRequestException('parentId is invalid');
+      }
+    }
+
     const postData = {
+      parentId: postDto.parentId,
       content: postDto.content,
       postImage: postImages
         ? await SaveImage(postImages, process.env.UPLOAD_PATH_POSTS)
         : null,
     };
-    await this.postService
-      .create(postData, req.user.id)
-      .catch((err) => ValidationException(err));
+
+    try {
+      const res = await this.postService.create(postData, req.user.id);
+      return {
+        id: res.id,
+      };
+    } catch (err) {
+      ValidationException(err);
+    }
   }
 
   @HttpCode(204)

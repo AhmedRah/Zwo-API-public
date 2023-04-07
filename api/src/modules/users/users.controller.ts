@@ -120,13 +120,4 @@ export class UsersController {
   async findFollowing(@Param('id') id: string) {
     return this.usersService.findFollowing(+id);
   }
-
-  @Get(':id/posts')
-  async findPosts(@Param('id') id: string) {
-    const posts = await this.usersService.findPosts(+id);
-    return posts.posts.map((p) => ({
-      ...p.details,
-      author: posts.detailName,
-    }));
-  }
 }

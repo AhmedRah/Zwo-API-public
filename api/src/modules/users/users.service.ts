@@ -13,6 +13,7 @@ import {
 } from '../../core/constants';
 import * as process from 'process';
 import { Op } from 'sequelize';
+import { Post } from '../posts/post.entity';
 
 @Injectable()
 export class UsersService {
@@ -135,7 +136,16 @@ export class UsersService {
   async findPosts(id: number) {
     return await this.userRepository.findOne({
       where: { id },
-      include: 'posts',
+      include: [
+        {
+          model: Post,
+          as: 'posts',
+          where: {
+            parentId: null,
+          },
+        },
+      ],
+      order: [['posts', 'createdAt', 'DESC']],
     });
   }
 }
