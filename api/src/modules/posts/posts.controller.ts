@@ -52,7 +52,11 @@ export class PostsController {
     if (!post) {
       throw new NotFoundException("This Post doesn't exist");
     }
-    return { ...post.details, author: post.user.detailName };
+    return {
+      ...post.details,
+      author: post.user.detailName,
+      likeCount: post.likes.length,
+    };
   }
 
   @Post()

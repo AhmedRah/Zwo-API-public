@@ -65,13 +65,14 @@ export class PostsService {
       order: [['createdAt', 'DESC']],
       offset,
       limit,
-      include: ['user', 'children'],
+      include: ['user', 'children', 'likes'],
     });
 
     return {
       rows: rows.map((post) => ({
         ...post.details,
         author: post.user.detailName,
+        likeCount: post.likes.length,
       })),
       count,
     };
@@ -80,7 +81,7 @@ export class PostsService {
   async findOne(id): Promise<Post> {
     return await this.postRepository.findOne({
       where: { id },
-      include: 'user',
+      include: ['user', 'likes'],
     });
   }
 
