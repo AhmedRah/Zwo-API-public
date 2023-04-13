@@ -24,6 +24,11 @@ export class AnimalBreed extends Model<AnimalBreed> {
   })
   translation: string;
 
+  @Column({
+    type: DataType.INTEGER,
+  })
+  order: number;
+
   get typeDetail() {
     return {
       id: this.id,
