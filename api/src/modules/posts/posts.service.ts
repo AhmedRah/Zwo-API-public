@@ -72,7 +72,6 @@ export class PostsService {
       rows: rows.map((post) => ({
         ...post.details,
         author: post.user.detailName,
-        likeCount: post.likes.length,
       })),
       count,
     };

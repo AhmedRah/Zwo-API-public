@@ -55,7 +55,6 @@ export class PostsController {
     return {
       ...post.details,
       author: post.user.detailName,
-      likeCount: post.likes.length,
     };
   }
 
