@@ -191,22 +191,26 @@ export class User extends Model<User> {
 
   private get avatarObject() {
     let dir;
-    let avatar = this.avatar || 'default.png';
+    const avatar = this.avatar || 'default.png';
     const color = this.avatarColor || 'ff914d'; // orange
 
+    let image, custom;
     if (
       this.avatarCustom &&
       [UserTypes.CERTIFIED, UserTypes.ASSOCIATION, UserTypes.COMPANY].includes(
         this.type,
       )
     ) {
-      dir = process.env.UPLOAD_PATH_AVATAR;
-      avatar = this.avatarCustom;
+      custom = true;
+      image = this.avatarCustom;
+    } else {
+      image = GetBase64Image(avatar, dir || process.env.PATH_AVATAR);
     }
 
     return {
-      image: GetBase64Image(avatar, dir || process.env.PATH_AVATAR),
+      image,
       color: color,
+      custom: custom || false,
     };
   }
 
