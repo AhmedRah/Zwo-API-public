@@ -71,6 +71,7 @@ export class Post extends Model<Post> {
         : null,
       children: this.children?.length || 0,
       createdAt: this.createdAt,
+      likes: this.likes?.length,
     };
   }
 }
