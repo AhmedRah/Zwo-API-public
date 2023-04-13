@@ -1,6 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { Like } from './like.entity';
-import { LikesDto } from './dto/like.dto';
 
 @Injectable()
 export class LikesService {
@@ -28,9 +27,12 @@ export class LikesService {
   }
 
   // create new like
-  async create(postLiked, author): Promise<Like> {
-    const like: LikesDto = { ...postLiked, author };
-    return await this.likeRepository.create<Like>(like);
+  async create(postLiked, author) {
+    const like = {
+      post: postLiked.post,
+      author,
+    };
+    return await this.likeRepository.upsert(like);
   }
 
   // delete a like

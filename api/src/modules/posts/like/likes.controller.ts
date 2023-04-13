@@ -8,12 +8,15 @@ import {
   NotFoundException,
   UseGuards,
   Request,
+  HttpCode,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { Like as LikeEntity } from './like.entity';
 import { LikesService } from './likes.service';
 import { ApiTags } from '@nestjs/swagger';
+import { LikesDto } from './dto/like.dto';
+import { ValidationException } from '../../../utils/error';
 
+@UseGuards(AuthGuard('jwt'))
 @ApiTags('posts-likes')
 @Controller('likes')
 export class LikesController {
@@ -27,7 +30,6 @@ export class LikesController {
   }
 
   // get all likes for self
-  @UseGuards(AuthGuard('jwt'))
   @Get('self')
   async findAllForSelf(@Request() req) {
     const likes = await this.likeService.findAllForSelf(req.user.id);
@@ -50,26 +52,20 @@ export class LikesController {
   }
 
   // like a post
-  @UseGuards(AuthGuard('jwt'))
+  @HttpCode(201)
   @Post()
-  async create(@Body() postLiked, @Request() req): Promise<LikeEntity> {
-    return await this.likeService.create(postLiked, req.user.id);
+  async create(@Body() postLiked: LikesDto, @Request() req) {
+    try {
+      await this.likeService.create(postLiked, req.user.id);
+    } catch (err) {
+      ValidationException(err);
+    }
   }
 
   // unlike a post
-  @UseGuards(AuthGuard('jwt'))
+  @HttpCode(204)
   @Delete(':id')
   async remove(@Param('id') id: number, @Request() req) {
-    // delete the post with this id
-    const deleted = await this.likeService.delete(id, req.user.id);
-
-    // if the number of row affected is zero,
-    // it means the post doesn't exist in our db
-    if (deleted === 0) {
-      throw new NotFoundException("This Post doesn't exist");
-    }
-
-    // return success message
-    return 'Successfully deleted';
+    await this.likeService.delete(id, req.user.id);
   }
 }
