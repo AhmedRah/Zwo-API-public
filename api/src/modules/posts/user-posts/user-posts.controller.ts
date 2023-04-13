@@ -11,7 +11,7 @@ export class UserPostsController {
 
   @ApiQuery({
     name: 'type',
-    schema: { type: 'string', default: 'all', enum: ['all', 'media'] },
+    schema: { type: 'string', default: 'all', enum: ['all', 'media', 'liked'] },
   })
   @Get()
   findUserPosts(

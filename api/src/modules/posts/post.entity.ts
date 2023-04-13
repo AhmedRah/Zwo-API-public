@@ -69,9 +69,14 @@ export class Post extends Model<Post> {
       postImage: this.postImage
         ? GetBase64Image(this.postImage, process.env.UPLOAD_PATH_POSTS)
         : null,
+      liked: this.isLiked,
       children: this.children?.length || 0,
       createdAt: this.createdAt,
       likes: this.likes?.length,
     };
+  }
+
+  private get isLiked() {
+    return this.likes?.map((u) => u.id).includes(this.author);
   }
 }
