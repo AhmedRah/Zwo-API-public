@@ -2,16 +2,18 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { POST_REPOSITORY } from '../../../core/constants';
 import { Post } from '../post.entity';
 import { Op } from 'sequelize';
+import { Like } from '../like/like.entity';
 
 @Injectable()
 export class UserPostsService {
   constructor(
     @Inject(POST_REPOSITORY) private readonly postRepository: typeof Post,
+    @Inject('LIKE_REPOSITORY') private readonly likeRepository: typeof Like,
   ) {}
 
   async findUserPosts(userId: number, type = 'all', page = 1, limit = 10) {
-    // If type is not 'all' or 'media', throw a bad request exception
-    if (type !== 'all' && type !== 'media') {
+    // If type is not valid
+    if (!['all', 'media', 'liked'].includes(type)) {
       throw new BadRequestException('type is not valid');
     }
 
@@ -22,7 +24,6 @@ export class UserPostsService {
     const offset = (page - 1) * limit;
 
     const where = {
-      author: userId,
       parentId: null,
     };
 
@@ -30,8 +31,20 @@ export class UserPostsService {
       where['postImage'] = { [Op.not]: null };
     }
 
+    if (type === 'liked') {
+      const likesId = await this.likeRepository.findAll({
+        where: { author: userId },
+      });
+
+      where['id'] = { [Op.in]: likesId.map((like) => like.post) };
+    }
+
+    if (type !== 'liked') {
+      where['author'] = userId;
+    }
+
     const { count, rows } = await this.postRepository.findAndCountAll({
-      include: ['user', 'children'],
+      include: ['user', 'children', 'likes'],
       where,
       order: [['createdAt', 'DESC']],
       offset,
