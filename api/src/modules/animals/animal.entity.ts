@@ -83,6 +83,7 @@ export class Animal extends Model<Animal> {
       name: this.name,
       description: this.description,
       birthday: this.birthday,
+      age: this.age,
       weight: this.weight,
       avatar: this.avatar64,
       breed: this.breed?.breedDetail,
@@ -95,5 +96,16 @@ export class Animal extends Model<Animal> {
     return !this.avatar
       ? null
       : GetBase64Image(this.avatar, process.env.UPLOAD_PATH_ANIMALS);
+  }
+
+  private get age() {
+    const birthday = new Date(this.birthday);
+    const today = new Date();
+    let age = today.getFullYear() - birthday.getFullYear();
+    const m = today.getMonth() - birthday.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthday.getDate())) {
+      age--;
+    }
+    return age;
   }
 }
