@@ -11,7 +11,7 @@ services:
     volumes:
       - ./api/:/usr/src/api
     ports:
-      - "172.17.0.1:3000:3000"
+      - "3000:3000"
     depends_on:
       - db
 
@@ -19,7 +19,7 @@ services:
     image: adminer
     # restart: always
     ports:
-      - "172.17.0.1:8080:8080"
+      - "8080:8080"
 
   db:
     image: postgres:13-alpine
@@ -32,7 +32,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASS}
       POSTGRES_DB: ${DB_NAME_DEVELOPMENT}
     ports:
-      - "172.17.0.1:5432:5432"
+      - "5432:5432"
     healthcheck:
       test: [ "CMD", "postgresDB", "ping", "-h", "localhost" ]
       timeout: 5s
