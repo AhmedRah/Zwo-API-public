@@ -80,6 +80,9 @@
       "json",
       "ts"
     ],
+    "testPathIgnorePatterns": [
+      "^.*\\.service.ts$"
+    ],
     "rootDir": "src",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
