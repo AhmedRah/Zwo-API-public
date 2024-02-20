@@ -1,4 +1,5 @@
 # zwo-backend
+![alt text](docs/logo-zwo.png)
 
 ## Installation
 
